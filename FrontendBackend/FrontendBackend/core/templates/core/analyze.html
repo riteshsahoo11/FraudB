@@ -1,0 +1,141 @@
+{% extends 'core/base.html' %}
+{% load static core_extras %}
+
+{% block title %}Analyze Data - BFSI Intelligence{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'assets/css/dashboard-modern.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container mt-5 pt-4">
+  <div class="row justify-content-center">
+    <div class="col-lg-10">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3 class="mb-0"><i class="bi bi-search me-2"></i>Analyze: {{ file_name }}</h3>
+        <div>
+          <a href="{% url 'upload' %}" class="btn btn-outline-secondary btn-sm">Back to Uploads</a>
+          <a href="{% url 'dashboard' %}" class="btn btn-primary btn-sm ms-2">Dashboard</a>
+        </div>
+      </div>
+
+      {% if parse_error %}
+      <div class="alert alert-warning d-flex align-items-center" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+        <div>
+          {{ parse_error }}
+          {% if requires_install %}<br>
+          Tip: run <code>pip install openpyxl</code> to analyze .xlsx files.
+          {% endif %}
+        </div>
+      </div>
+      {% endif %}
+
+      <div class="row g-3 mb-3">
+        <div class="col-md-3">
+          <div class="card shadow-sm h-100">
+            <div class="card-body text-center">
+              <div class="text-muted">Rows Parsed</div>
+              <div class="fs-4 fw-bold">{{ row_count }}</div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="card shadow-sm h-100">
+            <div class="card-body text-center">
+              <div class="text-muted">Rows Saved</div>
+              <div class="fs-4 fw-bold">{{ saved_count }}</div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="card shadow-sm h-100">
+            <div class="card-body">
+              <div class="text-muted mb-2">Columns</div>
+              {% if columns %}
+              <div class="small">
+                {% for c in columns %}
+                  <span class="badge bg-light text-dark border me-1 mb-1">{{ c }}</span>
+                {% endfor %}
+              </div>
+              {% else %}
+              <div class="text-muted small">No columns detected.</div>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Validation Summary -->
+      <div class="card shadow-sm mb-3">
+        <div class="card-header bg-white d-flex justify-content-between align-items-center">
+          <h5 class="mb-0">Validation Summary</h5>
+        </div>
+        <div class="card-body">
+          <div class="mb-2 text-muted small">Required features (from settings)</div>
+          {% if required_columns %}
+          <div class="mb-2">
+            {% for rc in required_columns %}
+              {% if missing_required and rc in missing_required %}
+                <span class="pill pill--missing me-1 mb-1">{{ rc }}</span>
+              {% else %}
+                <span class="pill pill--ok me-1 mb-1">{{ rc }}</span>
+              {% endif %}
+            {% endfor %}
+          </div>
+          {% endif %}
+
+          {% if missing_required and missing_required|length > 0 %}
+          <div class="alert alert-warning mb-0" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            Missing required columns: {{ missing_required|join:', ' }}. Predictions may be impacted. Please include the required features.
+          </div>
+          {% else %}
+          <div class="alert alert-success mb-0" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i>
+            All required features are present.
+          </div>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="card shadow-sm">
+        <div class="card-header bg-white d-flex justify-content-between align-items-center">
+          <h5 class="mb-0">Sample (first {{ sample_rows|length }} rows)</h5>
+        </div>
+        <div class="card-body">
+          {% if sample_rows and columns %}
+          <div class="table-responsive">
+            <table class="table table-modern table-sm table-striped table-hover">
+              <thead>
+                <tr>
+                  {% for c in columns %}
+                    <th>{{ c }}</th>
+                  {% endfor %}
+                </tr>
+              </thead>
+              <tbody>
+                {% for row in sample_rows %}
+                <tr>
+                  {% for c in columns %}
+                    <td>{{ row|get_item:c }}</td>
+                  {% endfor %}
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          {% elif sample_rows %}
+          <pre class="small bg-light p-3 border rounded">{{ sample_rows|safe }}</pre>
+          {% else %}
+          <div class="text-center text-muted py-4">
+            <i class="bi bi-inbox display-6 d-block mb-2"></i>
+            No preview available.
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

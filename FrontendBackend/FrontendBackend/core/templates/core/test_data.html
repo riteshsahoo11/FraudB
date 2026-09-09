@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Data Test Page</title>
+    <style>
+        body { font-family: Arial; padding: 20px; background: #f5f5f5; }
+        .box { background: white; padding: 20px; margin: 10px 0; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .success { color: green; font-weight: bold; }
+        .error { color: red; font-weight: bold; }
+        pre { background: #eee; padding: 10px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <h1>🔥 DATA TEST PAGE 🔥</h1>
+    <p>If you see data below, the backend is working. If not, there's a server issue.</p>
+
+    <div class="box">
+        <h2>📊 Model Information</h2>
+        <div id="model-info">Loading...</div>
+    </div>
+
+    <div class="box">
+        <h2>🎯 Feature Importance (Top 10)</h2>
+        <div id="features">Loading...</div>
+    </div>
+
+    <div class="box">
+        <h2>📈 Metrics</h2>
+        <div id="metrics">Loading...</div>
+    </div>
+
+    <div class="box">
+        <h2>🔍 Raw API Response</h2>
+        <pre id="raw-data">Loading...</pre>
+    </div>
+
+    <script>
+        console.log('Starting data fetch...');
+        
+        fetch('/api/performance?force=1')
+            .then(response => {
+                console.log('Response status:', response.status);
+                return response.json();
+            })
+            .then(data => {
+                console.log('Got data:', data);
+                
+                // Show raw data
+                document.getElementById('raw-data').textContent = JSON.stringify(data, null, 2);
+                
+                // Model Info
+                const model = data.model_info || {};
+                document.getElementById('model-info').innerHTML = `
+                    <p class="success">✓ Model Type: <strong>${model.model_type || 'Unknown'}</strong></p>
+                    <p class="success">✓ Features: <strong>${model.feature_count || 0}</strong></p>
+                    <p class="success">✓ Loaded: <strong>${model.model_loaded ? 'YES' : 'NO'}</strong></p>
+                    <p class="success">✓ Training Fraud Rate: <strong>${((model.fraud_rate || 0) * 100).toFixed(2)}%</strong></p>
+                `;
+                
+                // Features
+                const features = data.feature_importance || [];
+                if (features.length > 0) {
+                    let html = '<ol>';
+                    features.slice(0, 10).forEach(f => {
+                        html += `<li><strong>${f.feature}</strong>: ${(f.importance * 100).toFixed(2)}%</li>`;
+                    });
+                    html += '</ol>';
+                    document.getElementById('features').innerHTML = html;
+                } else {
+                    document.getElementById('features').innerHTML = '<p class="error">✗ No feature importance data</p>';
+                }
+                
+                // Metrics
+                const metrics = (data.metrics && data.metrics.metrics) || {};
+                if (Object.keys(metrics).length > 0) {
+                    document.getElementById('metrics').innerHTML = `
+                        <p class="success">✓ Accuracy: <strong>${(metrics.accuracy * 100).toFixed(2)}%</strong></p>
+                        <p class="success">✓ Precision: <strong>${(metrics.precision * 100).toFixed(2)}%</strong></p>
+                        <p class="success">✓ Recall: <strong>${(metrics.recall * 100).toFixed(2)}%</strong></p>
+                        <p class="success">✓ F1-Score: <strong>${(metrics.f1 * 100).toFixed(2)}%</strong></p>
+                    `;
+                } else {
+                    document.getElementById('metrics').innerHTML = '<p class="error">✗ No metrics data</p>';
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                document.getElementById('model-info').innerHTML = '<p class="error">✗ ERROR: ' + error.message + '</p>';
+                document.getElementById('features').innerHTML = '<p class="error">✗ API call failed</p>';
+                document.getElementById('metrics').innerHTML = '<p class="error">✗ API call failed</p>';
+                document.getElementById('raw-data').textContent = 'ERROR: ' + error.message;
+            });
+    </script>
+</body>
+</html>

@@ -1,0 +1,99 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}ML Operations - FraudB{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'assets/css/dashboard-modern.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row align-items-center mb-4">
+    <div class="col">
+      <h1 class="h3 mb-0">ML Operations</h1>
+      <p class="text-muted mb-0">Run single or batch predictions, simulate demo data, and view results on the Dashboard.</p>
+    </div>
+    <div class="col-auto">
+      <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary"><i class="bi bi-speedometer2"></i> Back to Dashboard</a>
+    </div>
+  </div>
+
+  <!-- Prediction Widget is reused here -->
+    <div class="col-12">
+      <div id="predictionWidget"></div>
+    </div>
+  </div>
+
+  <!-- At-a-glance: Key Indicators and Activity Summary -->
+  <div class="row mb-4">
+    <div class="col-md-7">
+      <div class="card shadow-sm">
+        <div class="card-header">
+          <h5 class="mb-0"><i class="fas fa-star me-2"></i>Key Fraud Indicators</h5>
+          <p class="text-muted small mb-0 mt-2">Top features driving the model's fraud decisions.</p>
+        </div>
+        <div class="card-body">
+          <div class="chart-container chart-container-lg">
+            <canvas id="featImpChart"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-5">
+      <div class="card shadow-sm">
+        <div class="card-header">
+          <h5 class="mb-0"><i class="fas fa-user-chart me-2"></i>Your Activity Summary</h5>
+          <p class="text-muted small mb-0 mt-2">Your total, real-time, and batch predictions.</p>
+        </div>
+        <div class="card-body" id="userStats">
+          <div class="text-center text-muted py-3">
+            <div class="spinner-border spinner-border-sm" role="status"></div>
+            <span class="ms-2">Loading stats...</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Recent Predictions -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="card shadow-sm">
+        <div class="card-header">
+          <h5 class="mb-0"><i class="fas fa-history me-2"></i>Recent Predictions</h5>
+        </div>
+        <div class="card-body" id="predictionHistory">
+          <div class="text-center text-muted py-3">
+            <div class="spinner-border spinner-border-sm" role="status"></div>
+            <span class="ms-2">Loading prediction history...</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+<!-- Guidance Panel -->
+  <div class="row">
+    <div class="col-md-12">
+      <div class="card shadow-sm mb-4">
+        <div class="card-header">
+          <h5 class="mb-0">How to use</h5>
+        <div class="card-body">
+          <ul class="mb-0">
+            <li>Provide real transaction data in the Single Transaction form and submit to get an immediate prediction.</li>
+            <li>Use the Batch Upload tab to process CSV, XLSX, or JSON files (max 1000 rows).</li>
+            <li>All predictions will appear on the Dashboard charts and Recent Predictions list automatically.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'assets/js/dashboard.js' %}?v=20251001-0029"></script>
+{% endblock %}

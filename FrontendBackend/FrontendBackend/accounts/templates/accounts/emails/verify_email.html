@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verify Your Email - FraudB</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #1f2937;
+            margin: 0;
+            padding: 0;
+            background-color: #f3f4f6;
+        }
+        .email-wrapper {
+            max-width: 600px;
+            margin: 40px auto;
+            background: #ffffff;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .header {
+            background: #ffffff;
+            padding: 32px 40px 24px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        .logo {
+            font-size: 28px;
+            font-weight: 700;
+            color: #FF6B01;
+            margin: 0;
+        }
+        .content {
+            padding: 40px 40px 32px;
+        }
+        .greeting {
+            font-size: 18px;
+            font-weight: 600;
+            color: #111827;
+            margin: 0 0 16px;
+        }
+        .message {
+            font-size: 15px;
+            color: #4b5563;
+            margin: 0 0 24px;
+            line-height: 1.6;
+        }
+        .otp-container {
+            background: #f9fafb;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 24px;
+            text-align: center;
+            margin: 32px 0;
+        }
+        .otp-label {
+            font-size: 13px;
+            color: #6b7280;
+            margin: 0 0 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+        }
+        .otp-code {
+            font-size: 36px;
+            font-weight: 700;
+            color: #FF6B01;
+            letter-spacing: 8px;
+            margin: 8px 0;
+            font-family: 'Courier New', monospace;
+        }
+        .otp-expiry {
+            font-size: 13px;
+            color: #9ca3af;
+            margin: 12px 0 0;
+        }
+        .info-box {
+            background: #fef3c7;
+            border-left: 4px solid #f59e0b;
+            padding: 16px 20px;
+            margin: 24px 0;
+            border-radius: 4px;
+        }
+        .info-box p {
+            margin: 0;
+            font-size: 14px;
+            color: #92400e;
+            line-height: 1.5;
+        }
+        .security-tips {
+            background: #f9fafb;
+            padding: 20px;
+            border-radius: 6px;
+            margin: 24px 0;
+        }
+        .security-tips h3 {
+            font-size: 14px;
+            font-weight: 600;
+            color: #374151;
+            margin: 0 0 12px;
+        }
+        .security-tips ul {
+            margin: 0;
+            padding-left: 20px;
+        }
+        .security-tips li {
+            font-size: 14px;
+            color: #6b7280;
+            margin: 8px 0;
+        }
+        .footer {
+            background: #f9fafb;
+            padding: 32px 40px;
+            text-align: center;
+            border-top: 1px solid #e5e7eb;
+        }
+        .footer p {
+            margin: 8px 0;
+            font-size: 13px;
+            color: #9ca3af;
+        }
+        .social-links {
+            margin: 16px 0 0;
+        }
+        .social-links a {
+            display: inline-block;
+            margin: 0 8px;
+            color: #9ca3af;
+            text-decoration: none;
+            font-size: 13px;
+        }
+        .divider {
+            height: 1px;
+            background: #e5e7eb;
+            margin: 24px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="email-wrapper">
+        <div class="header">
+            <h1 class="logo">FraudB</h1>
+        </div>
+        
+        <div class="content">
+            <p class="greeting">Hi {{ user.get_full_name|default:user.username }},</p>
+            
+            <p class="message">
+                Welcome to FraudB! To get started and secure your account, please verify your email address with the confirmation code below:
+            </p>
+            
+            <div class="otp-container">
+                <p class="otp-label">Verification Code</p>
+                <div class="otp-code">{{ otp_code }}</div>
+                <p class="otp-expiry">Expires in {{ expiry_minutes }} minutes</p>
+            </div>
+            
+            <div class="info-box">
+                <p><strong>Security Notice:</strong> If you didn't create a FraudB account, please disregard this email. Your information is safe.</p>
+            </div>
+            
+            <div class="security-tips">
+                <h3>🔒 Security Tips</h3>
+                <ul>
+                    <li>Never share this code with anyone, including FraudB staff</li>
+                    <li>This code expires after {{ expiry_minutes }} minutes</li>
+                    <li>Only enter this code on the FraudB verification page</li>
+                </ul>
+            </div>
+            
+            <div class="divider"></div>
+            
+            <p class="message">
+                Once verified, you'll have full access to our AI-powered fraud detection platform, real-time analytics, and enterprise-grade security features.
+            </p>
+            
+            <p class="message" style="margin-bottom: 0;">
+                Best regards,<br>
+                <strong>The FraudB Team</strong>
+            </p>
+        </div>
+
+        <div class="footer">
+            <p>© 2025 FraudB. All rights reserved.</p>
+            <p>This is an automated message. Please do not reply to this email.</p>
+            <div class="social-links">
+                <a href="#">Privacy Policy</a> • 
+                <a href="#">Terms of Service</a> • 
+                <a href="#">Support</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

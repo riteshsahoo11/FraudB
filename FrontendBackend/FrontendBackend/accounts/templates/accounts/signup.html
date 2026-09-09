@@ -1,0 +1,200 @@
+{% extends 'accounts/auth_base.html' %}
+{% load static %}
+
+{% block title %}Sign Up - BFSI Transaction Intelligence{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'assets/css/auth-modern.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+    <div class="auth-card">
+        <div class="auth-card-body">
+            <div class="auth-icon-header">
+                <div class="auth-icon-wrapper">
+                    <i class="bi bi-person-plus"></i>
+                </div>
+                <h2 class="auth-title">Create Your Account</h2>
+                <p>Join BFSI Transaction Intelligence Platform</p>
+            </div>
+        
+        <form method="post" id="signupForm">
+            {% csrf_token %}
+            
+            <div class="auth-field">
+                <label for="{{ form.username.id_for_label }}" class="auth-label">Username</label>
+                <input type="text" class="auth-input" name="{{ form.username.name }}" id="{{ form.username.id_for_label }}" placeholder="Enter your username">
+                {% if form.username.errors %}
+                    <div class="auth-error">{{ form.username.errors.0 }}</div>
+                {% endif %}
+            </div>
+            
+            <div class="auth-field">
+                <label for="{{ form.email.id_for_label }}" class="auth-label">Email Address</label>
+                <input type="email" class="auth-input" name="{{ form.email.name }}" id="{{ form.email.id_for_label }}" placeholder="Enter your email address">
+                {% if form.email.errors %}
+                    <div class="auth-error">{{ form.email.errors.0 }}</div>
+                {% endif %}
+            </div>
+            
+            <div class="auth-field">
+                <label for="{{ form.password.id_for_label }}" class="auth-label">Password</label>
+                <div class="auth-password-container">
+                    <input type="password" class="auth-password-input" name="{{ form.password.name }}" id="{{ form.password.id_for_label }}" placeholder="Enter your password">
+                    <button type="button" class="auth-password-toggle" onclick="togglePassword('{{ form.password.id_for_label }}', this)">
+                        <i class="bi bi-eye"></i>
+                    </button>
+                </div>
+                <div class="auth-pwd-req" id="passwordRequirements">
+                    <div class="requirement" id="lengthReq">
+                        <i class="bi bi-circle"></i>
+                        At least 8 characters
+                    </div>
+                    <div class="requirement" id="numberReq">
+                        <i class="bi bi-circle"></i>
+                        Contains a number
+                    </div>
+                    <div class="requirement" id="specialReq">
+                        <i class="bi bi-circle"></i>
+                        Contains a special character
+                    </div>
+                </div>
+                {% if form.password.errors %}
+                    <div class="auth-error">{{ form.password.errors.0 }}</div>
+                {% endif %}
+            </div>
+            
+            <div class="auth-field">
+                <label for="{{ form.confirm_password.id_for_label }}" class="auth-label">Confirm Password</label>
+                <div class="auth-password-container">
+                    <input type="password" class="auth-password-input" name="{{ form.confirm_password.name }}" id="{{ form.confirm_password.id_for_label }}" placeholder="Confirm your password">
+                    <button type="button" class="auth-password-toggle" onclick="togglePassword('{{ form.confirm_password.id_for_label }}', this)">
+                        <i class="bi bi-eye"></i>
+                    </button>
+                </div>
+                {% if form.confirm_password.errors %}
+                    <div class="auth-error">{{ form.confirm_password.errors.0 }}</div>
+                {% endif %}
+            </div>
+            
+            <div class="auth-field">
+                <div class="form-check">
+                    <input class="auth-checkbox" type="checkbox" id="termsCheck" required>
+                    <label class="auth-checkbox-label" for="termsCheck">
+                        I agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>
+                    </label>
+                </div>
+            </div>
+            
+            <button type="submit" class="auth-btn" id="submitBtn">
+                <span id="btnText">Create Account</span>
+                <span id="btnLoader" class="spinner-border spinner-border-sm ms-2 d-none"></span>
+            </button>
+        </form>
+        
+            <div class="auth-footer">
+                <p>Already have an account? <a href="{% url 'login' %}">Sign In</a></p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Global password toggle function
+function togglePassword(inputId, button) {
+    const passwordInput = document.getElementById(inputId);
+    const icon = button.querySelector('i');
+    
+    if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+        icon.className = 'bi bi-eye-slash';
+    } else {
+        passwordInput.type = 'password';
+        icon.className = 'bi bi-eye';
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    const passwordInput = document.getElementById('{{ form.password.id_for_label }}');
+    const passwordReq = document.getElementById('passwordRequirements');
+    const lengthReq = document.getElementById('lengthReq');
+    const numberReq = document.getElementById('numberReq');
+    const specialReq = document.getElementById('specialReq');
+
+    // Ensure requirements tray is fully collapsed on load
+    passwordReq.classList.remove('show');
+    passwordReq.style.maxHeight = '0px';
+
+    function showPwdReq() {
+        passwordReq.classList.add('show');
+        // Set dynamic height for smooth expand
+        passwordReq.style.maxHeight = passwordReq.scrollHeight + 'px';
+    }
+
+    function hidePwdReq() {
+        passwordReq.classList.remove('show');
+        // Collapse height to remove space completely
+        passwordReq.style.maxHeight = '0px';
+    }
+
+    // Show requirements when user starts typing
+    passwordInput.addEventListener('input', function() {
+        const password = passwordInput.value;
+        
+        // Show requirements when user starts typing
+        if (password.length > 0) {
+            showPwdReq();
+        } else {
+            hidePwdReq();
+        }
+        
+        // Check length requirement
+        if (password.length >= 8) {
+            lengthReq.classList.add('valid');
+            lengthReq.querySelector('i').className = 'bi bi-check-circle-fill';
+        } else {
+            lengthReq.classList.remove('valid');
+            lengthReq.querySelector('i').className = 'bi bi-circle';
+        }
+
+        // Check number requirement
+        if (/\d/.test(password)) {
+            numberReq.classList.add('valid');
+            numberReq.querySelector('i').className = 'bi bi-check-circle-fill';
+        } else {
+            numberReq.classList.remove('valid');
+            numberReq.querySelector('i').className = 'bi bi-circle';
+        }
+
+        // Check special character requirement
+        if (/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) {
+            specialReq.classList.add('valid');
+            specialReq.querySelector('i').className = 'bi bi-check-circle-fill';
+        } else {
+            specialReq.classList.remove('valid');
+            specialReq.querySelector('i').className = 'bi bi-circle';
+        }
+    });
+    
+    // Hide requirements when field loses focus and is empty
+    passwordInput.addEventListener('blur', function() {
+        if (passwordInput.value === '') {
+            hidePwdReq();
+        }
+    });
+});
+
+document.getElementById('signupForm').addEventListener('submit', function(e) {
+    const btn = document.getElementById('submitBtn');
+    const btnText = document.getElementById('btnText');
+    const btnLoader = document.getElementById('btnLoader');
+    
+    btn.disabled = true;
+    btnText.textContent = 'Creating Account...';
+    btnLoader.classList.remove('d-none');
+});
+</script>
+{% endblock %}

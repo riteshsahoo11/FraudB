@@ -1,0 +1,24 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}Privacy Policy - FraudB{% endblock %}
+
+{% block content %}
+<section class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      <h1 class="mb-4">Privacy Policy</h1>
+      <p class="text-muted">Your privacy is important to us. This policy explains what data we collect and how we use it.</p>
+      <hr>
+      <h5>Information We Collect</h5>
+      <p>We collect account information (name, email) and usage data necessary to provide fraud detection services.</p>
+      <h5>How We Use Information</h5>
+      <p>We use your information to operate and improve our services, provide support, and ensure platform security.</p>
+      <h5>Data Security</h5>
+      <p>We employ industry-standard security controls and encryption to protect your data.</p>
+      <h5>Contact</h5>
+      <p>For privacy inquiries, contact us via the <a href="{% url 'contact' %}">Contact</a> page.</p>
+    </div>
+  </div>
+</section>
+{% endblock %}

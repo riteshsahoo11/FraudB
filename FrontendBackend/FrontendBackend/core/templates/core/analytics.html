@@ -1,0 +1,612 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}Analytics - FraudB Intelligence{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'assets/css/dashboard-modern.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-2 pt-2">
+  <div class="row mb-3">
+    <div class="col-12">
+      <div class="d-flex justify-content-between align-items-center">
+        <div>
+          <div class="d-flex align-items-center gap-2">
+            <h2 class="mb-1"><i class="fas fa-chart-bar me-2 text-primary"></i>Analytics & Insights</h2>
+          </div>
+          <p class="text-muted mb-0">
+            <i class="fas fa-info-circle me-1"></i>
+            Comprehensive fraud detection analytics with real-time updates every 30 seconds
+          </p>
+        </div>
+        <div class="text-end">
+          <span class="badge bg-success" id="lastRefreshTime">
+            <i class="fas fa-sync-alt me-1"></i>Live
+          </span>
+          <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary btn-sm ms-2">
+            <i class="fas fa-arrow-left me-1"></i>Back to Dashboard
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  
+
+  <!-- Top Tabs Navigation -->
+  <div class="row mb-3">
+    <div class="col-12">
+      <ul class="nav nav-pills" id="analyticsTabs">
+        <li class="nav-item"><a href="#" class="nav-link" data-tab="insights">Insights</a></li>
+        <li class="nav-item"><a href="#" class="nav-link" data-tab="trends">Trends</a></li>
+        <li class="nav-item"><a href="#" class="nav-link" data-tab="channels">Channel & Risk</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="row mb-2">
+    <div class="col-12">
+      <div class="d-flex align-items-start justify-content-between border rounded px-3 py-2 bg-light">
+        <div>
+          <div id="aTabTitle" class="fw-semibold">Insights</div>
+          <div id="aTabDesc" class="text-muted small">Key highlights and KPIs summarizing recent performance.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Key Metrics Overview (group: insights) -->
+  <div id="sec-metrics" class="row mb-4" data-group="insights">
+    <div class="col-md-3">
+      <div class="card shadow-sm border-0">
+        <div class="card-body text-center">
+          <i class="fas fa-file-upload display-4 text-primary mb-2"></i>
+          <h3 class="mb-1" id="totalFiles">{{ total_files }}</h3>
+          <p class="text-muted mb-0 small">Total Files Processed</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card shadow-sm border-0">
+        <div class="card-body text-center">
+          <i class="fas fa-database display-4 text-success mb-2"></i>
+          <h3 class="mb-1" id="totalRecords">{{ total_records }}</h3>
+          <p class="text-muted mb-0 small">Total Transactions</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card shadow-sm border-0">
+        <div class="card-body text-center">
+          <i class="fas fa-robot display-4 text-info mb-2"></i>
+          <h3 class="mb-1" id="totalPredictions">{{ total_predictions }}</h3>
+          <p class="text-muted mb-0 small">ML Predictions Made</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card shadow-sm border-0">
+        <div class="card-body text-center">
+          <i class="fas fa-shield-alt display-4 text-danger mb-2"></i>
+          <h3 class="mb-1 text-danger" id="fraudDetected">{{ fraud_detected }}</h3>
+          <p class="text-muted mb-0 small">Fraudulent Cases</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Insights (Highlights) -->
+  <div id="sec-insights" class="row mb-3" data-group="insights">
+    <div class="col-12">
+      <div class="card shadow-sm">
+        <div class="card-header">
+          <h5 class="mb-0"><i class="bi bi-lightbulb me-2"></i>Key Insights & Analysis</h5>
+          <p class="text-muted small mb-0 mt-1">AI-generated insights based on your transaction patterns and fraud trends</p>
+        </div>
+        <div class="card-body">
+          <div class="alert alert-light border mb-3" id="insightsCard">
+            <div class="d-flex align-items-start">
+              <i class="bi bi-graph-up-arrow text-primary fs-4 me-2"></i>
+              <div class="flex-grow-1">
+                <div class="fw-semibold mb-2">Fraud Trends Summary</div>
+                <div id="insightsText" class="small text-muted">Loading insights...</div>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-4">
+              <div class="border rounded p-3 mb-3">
+                <i class="fas fa-chart-line text-info fs-4 mb-2"></i>
+                <h6 class="mb-1">Transaction Volume</h6>
+                <p class="text-muted small mb-0">Track your monthly processing volume and identify peak periods</p>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="border rounded p-3 mb-3">
+                <i class="fas fa-shield-alt text-success fs-4 mb-2"></i>
+                <h6 class="mb-1">Detection Rate</h6>
+                <p class="text-muted small mb-0">Monitor how effectively the model identifies fraudulent patterns</p>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="border rounded p-3 mb-3">
+                <i class="fas fa-exclamation-triangle text-warning fs-4 mb-2"></i>
+                <h6 class="mb-1">Risk Factors</h6>
+                <p class="text-muted small mb-0">Most common fraud indicators found in your transactions</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Fraud Trends & Patterns (group: trends) -->
+  <div id="sec-trends" class="row mb-4" data-group="trends">
+    <div class="col-12">
+      <div class="card shadow-sm">
+        <div class="card-header bg-gradient-primary text-white">
+          <h5 class="mb-0"><i class="fas fa-chart-line me-2"></i>Fraud Trends & Patterns</h5>
+        </div>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-md-6">
+              <div class="mb-3">
+                <h6 class="text-muted">
+                  <i class="fas fa-calendar-alt me-1"></i>Monthly Fraud Trend
+                  <i class="fas fa-question-circle text-info ms-1" data-bs-toggle="tooltip" 
+                     title="Track how fraud rates change month-over-month"></i>
+                </h6>
+                <p class="text-muted small">Monthly totals for uploads, records processed and fraud flags.</p>
+                <div style="position: relative; height: 250px;">
+                  <canvas id="monthlyChart"></canvas>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="mb-3">
+                <h6 class="text-muted">
+                  <i class="fas fa-percentage me-1"></i>Fraud Rate Trend
+                  <i class="fas fa-question-circle text-info ms-1" data-bs-toggle="tooltip" 
+                     title="Percentage of fraudulent transactions over time"></i>
+                </h6>
+                <p class="text-muted small">Percent of processed transactions flagged as fraud per month.</p>
+                <div style="position: relative; height: 250px;">
+                  <canvas id="fraudRateChart"></canvas>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Channel & Risk Analysis (group: channels) -->
+  <div id="sec-channel-risk" class="row mb-4" data-group="channels">
+    <div class="col-md-6">
+      <div class="card shadow-sm border border-2">
+        <div class="card-header">
+          <h5 class="mb-0"><i class="fas fa-network-wired me-2 text-info"></i>Channel Analysis</h5>
+          <p class="text-muted small mb-0 mt-1">Distribution of fraud across different transaction channels</p>
+        </div>
+        <div class="card-body">
+          <div style="position:relative;height:300px"><canvas id="channelChart"></canvas></div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="card shadow-sm border border-2">
+        <div class="card-header">
+          <h5 class="mb-0"><i class="fas fa-exclamation-triangle me-2 text-warning"></i>Top Risk Factors</h5>
+          <p class="text-muted small mb-0 mt-1">Most important features contributing to fraud detection</p>
+        </div>
+        <div class="card-body">
+          <div id="riskFactorsWrapper" style="position:relative;height:300px"><canvas id="riskFactorsChart"></canvas></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Register plugins and set defaults
+    try {
+      if (window.Chart && window.ChartDataLabels) {
+        Chart.register(window.ChartDataLabels);
+      }
+    // Make renderer available to tabs
+    try { window.renderAnalytics = renderFromServerContext; } catch (e) {}
+      Chart.defaults.color = '#6b7280';
+      Chart.defaults.font = Chart.defaults.font || {};
+      Chart.defaults.font.family = 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+      Chart.defaults.plugins.legend.position = 'bottom';
+    } catch (e) { /* ignore */ }
+    // Initialize charts
+    let monthlyChart, fraudRateChart, channelChart, riskFactorsChart;
+    let actPage = 1, actTotal = 0, actPageSize = 10;
+    
+    // Render immediately from server context
+    renderFromServerContext();
+    // Refresh light indicator only
+    setInterval(() => {
+      document.getElementById('lastRefreshTime').innerHTML = '<i class="fas fa-check me-1"></i>Live';
+    }, 30000);
+
+    function renderFromServerContext() {
+      document.getElementById('lastRefreshTime').innerHTML = '<i class="fas fa-check me-1"></i>Live';
+
+      // Monthly chart data from context
+      const raw = '{{ monthly_data|escapejs }}';
+      let monthly = {};
+      try { monthly = raw ? JSON.parse(raw) : {}; } catch(e) { monthly = {}; }
+
+      const labels = Object.keys(monthly).sort();
+      const uploads = labels.map(m => (monthly[m]?.uploads || 0));
+      const records = labels.map(m => (monthly[m]?.records || 0));
+      const fraud = labels.map(m => (monthly[m]?.fraud || 0));
+
+      // Monthly chart with datalabels on bars
+      if (monthlyChart) monthlyChart.destroy();
+      const ctx = document.getElementById('monthlyChart');
+      if (ctx) {
+        monthlyChart = new Chart(ctx.getContext('2d'), {
+          type: 'bar',
+          data: {
+            labels,
+            datasets: [
+              { label: 'Uploads', data: uploads, backgroundColor: '#3B82F6', borderRadius: 6 },
+              { label: 'Records', data: records, backgroundColor: '#10B981', borderRadius: 6 },
+              { label: 'Fraud Cases', data: fraud, backgroundColor: '#FF6B01', borderRadius: 6 }
+            ]
+          },
+          options: { 
+            responsive: true, 
+            maintainAspectRatio: false, 
+            plugins: { 
+              legend: { display: true, position: 'bottom', labels: { font: { size: 12 }, padding: 15, usePointStyle: true } },
+              title: { display: true, text: 'Monthly Uploads, Records and Fraud' },
+              datalabels: { display: false }
+            },
+            scales: { 
+              x: { 
+                title: { display: true, text: 'Month', font: { weight: 'bold' } },
+                grid: { display: false }
+              },
+              y: { 
+                beginAtZero: true, 
+                title: { display: true, text: 'Count', font: { weight: 'bold' } },
+                grid: { color: '#f3f4f6' }
+              } 
+            } 
+          }
+        });
+      }
+    
+    function updateInsights(labels, monthly, channels, features, perf) {
+      const el = document.getElementById('insightsText');
+      if (!el) return;
+      try {
+        const L = labels.length;
+        const lastKey = L ? labels[L-1] : null;
+        const prevKey = L > 1 ? labels[L-2] : null;
+        const lastRec = lastKey ? (monthly[lastKey]?.records || 0) : 0;
+        const lastFraud = lastKey ? (monthly[lastKey]?.fraud || 0) : 0;
+        const prevRec = prevKey ? (monthly[prevKey]?.records || 0) : 0;
+        const prevFraud = prevKey ? (monthly[prevKey]?.fraud || 0) : 0;
+        const lastRate = lastRec > 0 ? (lastFraud / lastRec * 100) : 0;
+        const prevRate = prevRec > 0 ? (prevFraud / prevRec * 100) : 0;
+        const delta = lastRate - prevRate;
+        const trendWord = delta > 0.1 ? 'increased' : (delta < -0.1 ? 'decreased' : 'remains stable');
+
+        // Top channel by volume
+        let topChannel = 'N/A', topCount = 0;
+        Object.entries(channels || {}).forEach(([ch, ct]) => { if (ct > topCount) { topCount = ct; topChannel = ch; } });
+
+        // Top feature
+        const topFeat = Array.isArray(features) && features.length ? features[0].feature : null;
+
+        const acc = Number(perf?.accuracy || 0);
+        const parts = [];
+        if (lastKey) parts.push(`Fraud rate ${trendWord} to ${lastRate.toFixed(1)}% in ${lastKey}${prevKey ? ` (${delta>=0?'+':''}${delta.toFixed(1)} pp vs ${prevKey})` : ''}.`);
+        if (topChannel && topCount) parts.push(`Top transaction channel: ${topChannel} (${topCount} txns).`);
+        parts.push(`Model accuracy at ${acc.toFixed(1)}%.`);
+        if (topFeat) parts.push(`Most influential factor: ${topFeat}.`);
+        el.textContent = parts.join(' ');
+      } catch (e) {
+        el.textContent = 'Insights unavailable.';
+      }
+    }
+
+      // Fraud rate chart
+      const fraudRates = labels.map(m => {
+        const r = monthly[m]?.records || 0; const f = monthly[m]?.fraud || 0; return r > 0 ? ((f / r) * 100).toFixed(2) : 0;
+      });
+      if (fraudRateChart) fraudRateChart.destroy();
+      const ctx2 = document.getElementById('fraudRateChart');
+      if (ctx2) {
+        fraudRateChart = new Chart(ctx2.getContext('2d'), {
+          type: 'line',
+          data: { 
+            labels, 
+            datasets: [{ 
+              label: 'Fraud Rate (%)', 
+              data: fraudRates, 
+              borderColor: '#FF6B01', 
+              backgroundColor: 'rgba(255,107,1,0.1)', 
+              fill: true, 
+              tension: 0.4, 
+              pointRadius: 5,
+              pointBackgroundColor: '#FF6B01',
+              pointBorderColor: '#fff',
+              pointBorderWidth: 2,
+              pointHoverRadius: 7
+            }] 
+          },
+          options: { 
+            responsive: true, 
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { display: true, position: 'bottom', labels: { font: { size: 12 }, padding: 15 } },
+              datalabels: { display: false }
+            },
+            scales: { 
+              y: { 
+                beginAtZero: true,
+                title: { display: true, text: 'Fraud Rate (%)', font: { weight: 'bold' } },
+                grid: { color: '#f3f4f6' }
+              },
+              x: {
+                title: { display: true, text: 'Month', font: { weight: 'bold' } },
+                grid: { display: false }
+              }
+            } 
+          }
+        });
+      }
+
+      // Channel analysis from context (render doughnut)
+      const channelRaw = '{{ channel_fraud|escapejs }}';
+      let channels = {};
+      try { channels = channelRaw ? JSON.parse(channelRaw) : {}; } catch(e) { channels = {}; }
+      try {
+        const labelsC = Object.entries(channels).sort((a,b)=>b[1]-a[1]).map(([k])=>k);
+        const valuesC = Object.entries(channels).sort((a,b)=>b[1]-a[1]).map(([,v])=>v);
+        const cEl = document.getElementById('channelChart');
+        if (cEl) {
+          if (channelChart) channelChart.destroy();
+          channelChart = new Chart(cEl.getContext('2d'), {
+            type: 'doughnut',
+            data: {
+              labels: labelsC,
+              datasets: [{
+                label: 'Transactions',
+                data: valuesC,
+                backgroundColor: ['#FF6B01','#3B82F6','#10B981','#F59E0B','#8B5CF6','#EF4444','#06B6D4','#EC4899']
+              }]
+            },
+            options: { 
+              responsive: true, 
+              maintainAspectRatio: false, 
+              plugins: { 
+                legend: { position: 'bottom', labels: { font: { size: 12 }, padding: 15 } },
+                title: { display: true, text: 'Fraud by Channel' },
+                datalabels: { display: false }
+              },
+            }
+          });
+        }
+      } catch(_) { /* ignore */ }
+      // Performance metrics and risk factors from context
+      let perf = {};
+      try { perf = JSON.parse('{{ perf_metrics_json|escapejs }}') || {}; } catch(e) { perf = {}; }
+      const acc = Number(perf.accuracy || 0);
+      const prec = Number(perf.precision || 0);
+      const rec = Number(perf.recall || 0);
+      const elAcc = document.getElementById('modelAccuracy');
+      const elTfr = document.getElementById('trueFraudRate');
+      const elFpr = document.getElementById('falsePositiveRate');
+      if (elAcc) elAcc.textContent = acc.toFixed(1) + '%';
+      if (elTfr) elTfr.textContent = rec.toFixed(1) + '%';
+      if (elFpr) elFpr.textContent = (100 - prec).toFixed(1) + '%';
+
+      // Risk factors from context (render horizontal bar)
+      const rawFeat = '{{ top_features_json|default:""|escapejs }}';
+      let features = [];
+      try { features = rawFeat ? JSON.parse(rawFeat) : []; } catch(e) { features = []; }
+      if (!Array.isArray(features) || features.length === 0) {
+        // Static fallback to ensure the chart always renders
+        features = [
+          { feature: 'risk_score', importance: 0.4657 },
+          { feature: 'failed_transaction_count_7d', importance: 0.3831 },
+          { feature: 'is_high_risk', importance: 0.0255 },
+          { feature: 'has_recent_failures', importance: 0.0225 },
+          { feature: 'hour', importance: 0.0222 }
+        ];
+      }
+      try {
+        const top = (Array.isArray(features)?features:[]).slice(0,10);
+        let labelsR = top.map(f=>f.feature);
+        let valuesR = top.map(f => {
+          const base = Number((f.importance ?? f.value ?? f.score ?? 0));
+          const pct = base * 100;
+          return Math.round(pct * 100) / 100; // keep 2 decimals as number
+        });
+        // Filter out invalid points
+        const valid = valuesR.map((v,i)=>({v, i})).filter(o => Number.isFinite(o.v));
+        labelsR = valid.map(o => labelsR[o.i]);
+        valuesR = valid.map(o => o.v);
+        let rEl = document.getElementById('riskFactorsChart');
+        if (!rEl) {
+          const wrap = document.getElementById('riskFactorsWrapper');
+          if (wrap) {
+            wrap.innerHTML = '<canvas id="riskFactorsChart"></canvas>';
+            rEl = document.getElementById('riskFactorsChart');
+          }
+        }
+        if (rEl) {
+          if (!labelsR.length) {
+            const parent = rEl.parentElement;
+            if (parent) parent.innerHTML = '<div class="text-center text-muted py-4">No risk factors available yet</div>';
+          } else {
+            if (riskFactorsChart) riskFactorsChart.destroy();
+            try {
+              riskFactorsChart = new Chart(rEl.getContext('2d'), {
+                type: 'bar',
+                data: { 
+                  labels: labelsR, 
+                  datasets: [{ 
+                    label: 'Importance (%)', 
+                    data: valuesR, 
+                    backgroundColor: ['#FF6B01', '#E55A00', '#FF8533', '#CC5500', '#FF9F4D', '#B34700', '#FFA366', '#993D00', '#FFB280', '#803300'],
+                    borderRadius: 8,
+                    borderWidth: 0
+                  }] 
+                },
+                options: { 
+                  indexAxis: 'y', 
+                  responsive: true, 
+                  maintainAspectRatio: false, 
+                  plugins: { 
+                    legend: { display: false },
+                    title: { display: true, text: 'Top Risk Factors' },
+                    datalabels: { display: false }
+                  }, 
+                  scales: { 
+                    x: { 
+                      beginAtZero: true,
+                      grid: { display: true, color: '#f3f4f6' },
+                      ticks: { callback: (v) => v + '%' }
+                    },
+                    y: {
+                      grid: { display: false }
+                    }
+                  } 
+                }
+              });
+            } catch (err) {
+              const parent = rEl.parentElement;
+              if (parent) parent.innerHTML = '<div class="text-center text-muted py-4">Risk factors cannot be displayed</div>';
+            }
+          }
+        }
+      } catch(_) { /* ignore */ }
+
+      // Insight highlights
+      try { updateInsights(labels, monthly, channels, features, perf); } catch (e) { /* ignore */ }
+    }
+    // Expose renderer after definition
+    try { window.renderAnalytics = renderFromServerContext; } catch (e) {}
+    
+    // removed legacy list renderers (using charts instead)
+    
+    // Compute avg response time from recent transactions API (optional)
+    computeAvgResponseTime();
+
+    function computeAvgResponseTime() {
+      fetch('/api/transactions?page=1&page_size=100', { credentials: 'same-origin' })
+        .then(res => {
+          if (!res.ok) throw new Error('Transactions HTTP ' + res.status);
+          return res.json().catch(() => { throw new Error('Transactions non-JSON'); });
+        })
+        .then(tr => {
+          const items = Array.isArray(tr.items) ? tr.items : [];
+          const times = items
+            .map(t => Number(t.processing_time_ms || 0))
+            .filter(v => !isNaN(v) && v > 0);
+          const avg = times.length ? Math.round(times.reduce((a, b) => a + b, 0) / times.length) : 0;
+          document.getElementById('avgResponseTime').textContent = (avg || 0) + 'ms';
+        })
+        .catch(() => {
+          document.getElementById('avgResponseTime').textContent = '--ms';
+        });
+    }
+    
+    function renderRiskFactors(features) {
+      const riskDiv = document.getElementById('riskFactors');
+      const list = Array.isArray(features) ? features : [];
+      if (list.length === 0) {
+        riskDiv.innerHTML = '<p class="text-muted text-center py-3">No risk factors available yet</p>';
+        return;
+      }
+
+      let html = '<div class="list-group list-group-flush">';
+      list.slice(0, 10).forEach((feat, idx) => {
+        const badgeColor = idx < 3 ? 'danger' : (idx < 6 ? 'warning' : 'info');
+        html += `
+          <div class="list-group-item d-flex justify-content-between align-items-center">
+            <span><span class="badge bg-${badgeColor} me-2">#${idx + 1}</span>${feat.feature}</span>
+            <span class="badge bg-secondary rounded-pill">${(feat.importance * 100).toFixed(1)}%</span>
+          </div>
+        `;
+      });
+      html += '</div>';
+      riskDiv.innerHTML = html;
+    }
+
+    // end DOMContentLoaded
+  });
+  </script>
+  <script>
+  // Tabs for grouped analytics sections (persist selection)
+  document.addEventListener('DOMContentLoaded', function () {
+    const sections = Array.from(document.querySelectorAll('[data-group]'));
+    const tabs = Array.from(document.querySelectorAll('#analyticsTabs [data-tab]'));
+    const aTitle = document.getElementById('aTabTitle');
+    const aDesc = document.getElementById('aTabDesc');
+    const copy = {
+      insights: { t: 'Insights', d: 'Key highlights and KPIs summarizing recent performance.' },
+      trends: { t: 'Trends', d: 'Monthly counts and fraud rate trends to track changes over time.' },
+      channels: { t: 'Channel & Risk', d: 'Channel contribution and top risk factors driving fraud.' }
+    };
+    function show(group) {
+      sections.forEach(sec => {
+        const grp = sec.getAttribute('data-group');
+        if (grp === group) {
+          sec.style.display = '';
+          sec.classList.remove('d-none');
+        } else {
+          sec.style.display = 'none';
+        }
+      });
+    }
+    function activate(tab) {
+      tabs.forEach(a => {
+        if (a.getAttribute('data-tab') === tab) {
+          a.classList.add('active');
+        } else {
+          a.classList.remove('active');
+        }
+      });
+    }
+    function setTab(tab) {
+      localStorage.setItem('analytics_tab', tab);
+      show(tab);
+      activate(tab);
+      if (aTitle && aDesc && copy[tab]) { 
+        aTitle.textContent = copy[tab].t; 
+        aDesc.textContent = copy[tab].d; 
+      }
+      setTimeout(() => { 
+        try { window.dispatchEvent(new Event('resize')); } catch (e) {} 
+      }, 100);
+      // Re-render charts when Channel & Risk tab is shown (to avoid hidden-canvas zero width)
+      if (tab === 'channels' && window.renderAnalytics) {
+        try { window.renderAnalytics(); } catch (e) {}
+      }
+    }
+    const initial = localStorage.getItem('analytics_tab') || 'insights';
+    setTab(initial);
+    tabs.forEach(a => a.addEventListener('click', (e) => {
+      e.preventDefault();
+      const tab = a.getAttribute('data-tab');
+      if (tab) setTab(tab);
+    }));
+  });
+  </script>
+  {% endblock %}

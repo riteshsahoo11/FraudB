@@ -1,0 +1,24 @@
+{% extends 'core/base.html' %}
+
+{% block title %}New Login Alert{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+  <div class="card shadow-sm">
+    <div class="card-header d-flex align-items-center">
+      <h5 class="mb-0"><i class="bi bi-shield-lock me-2"></i> New Login Alert</h5>
+    </div>
+    <div class="card-body">
+      <p class="mb-2">Hello {{ user.username }},</p>
+      <p class="mb-3">A new login was detected on your account:</p>
+      <ul class="mb-3">
+        <li>Time: {{ timestamp }}</li>
+        <li>IP Address: {{ ip_address }}</li>
+        <li>User Agent: {{ user_agent }}</li>
+      </ul>
+      <p class="mb-0">If this wasn't you, please secure your account immediately.</p>
+    </div>
+  </div>
+  
+</div>
+{% endblock %}

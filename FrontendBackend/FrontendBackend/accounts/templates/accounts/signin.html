@@ -1,0 +1,105 @@
+{% extends 'accounts/auth_base.html' %}
+{% load static %}
+
+{% block title %}Sign In - BFSI Transaction Intelligence{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'assets/css/auth-modern.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+    <div class="auth-card">
+        <div class="auth-card-body">
+            <div class="auth-icon-header">
+                <div class="auth-icon-wrapper">
+                    <i class="bi bi-box-arrow-in-right"></i>
+                </div>
+                <h2 class="auth-title">Welcome Back</h2>
+                <p>Sign in to your account to continue</p>
+            </div>
+        
+        <form method="post" action="{% url 'signin' %}" id="signinForm">
+            {% csrf_token %}
+            <input type="hidden" name="next" value="{{ request.GET.next|default:'' }}">
+            
+            <div class="auth-field">
+                <label for="{{ form.username.id_for_label }}" class="auth-label">Username or Email</label>
+                <input type="text" class="auth-input" name="{{ form.username.name }}" id="{{ form.username.id_for_label }}" placeholder="Enter your username or email">
+                {% if form.username.errors %}
+                    <div class="auth-error">{{ form.username.errors.0 }}</div>
+                {% endif %}
+            </div>
+            
+            <div class="auth-field">
+                <label for="{{ form.password.id_for_label }}" class="auth-label">Password</label>
+                <div class="auth-password-container">
+                    <input type="password" class="auth-password-input" name="{{ form.password.name }}" id="{{ form.password.id_for_label }}" placeholder="Enter your password">
+                    <button type="button" class="auth-password-toggle" onclick="togglePassword('{{ form.password.id_for_label }}', this)">
+                        <i class="bi bi-eye"></i>
+                    </button>
+                </div>
+                {% if form.password.errors %}
+                    <div class="auth-error">{{ form.password.errors.0 }}</div>
+                {% endif %}
+                {% if form.non_field_errors %}
+                    <div class="auth-error">{{ form.non_field_errors.0 }}</div>
+                {% endif %}
+            </div>
+            
+            <div class="auth-field">
+                <div class="form-check">
+                    <input type="checkbox" class="auth-checkbox" id="rememberMe" name="remember_me">
+                    <label class="auth-checkbox-label" for="rememberMe">
+                        Remember me
+                    </label>
+                </div>
+                <div class="mt-2">
+                    <a href="{% url 'forgot_password' %}" class="auth-link">Forgot Password?</a>
+                </div>
+            </div>
+            
+            <button type="submit" class="auth-btn" id="submitBtn">
+                <span id="btnText"><i class="bi bi-box-arrow-in-right me-2"></i>Sign In</span>
+                <span id="btnLoader" class="spinner-border spinner-border-sm ms-2 d-none"></span>
+            </button>
+        </form>
+        
+            <div class="auth-footer">
+                <p>Don't have an account? <a href="{% url 'signup' %}">Sign Up Now</a></p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Global password toggle function
+function togglePassword(inputId, button) {
+    const passwordInput = document.getElementById(inputId);
+    const icon = button.querySelector('i');
+    
+    if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+        icon.className = 'bi bi-eye-slash';
+    } else {
+        passwordInput.type = 'password';
+        icon.className = 'bi bi-eye';
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Handle form submission loading state
+    document.getElementById('signinForm').addEventListener('submit', function(e) {
+        const btn = document.getElementById('submitBtn');
+        const btnText = document.getElementById('btnText');
+        const btnLoader = document.getElementById('btnLoader');
+        
+        btn.disabled = true;
+        btnText.textContent = 'Signing In...';
+        btnLoader.classList.remove('d-none');
+    });
+});
+</script>
+{% endblock %}

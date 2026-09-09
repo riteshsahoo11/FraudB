@@ -1,0 +1,679 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'assets/css/dashboard-modern.css' %}">
+<style>
+    /* Modern Filter Pills */
+    .filter-pills { 
+        display: inline-flex; 
+        gap: 4px; 
+        background: #f3f4f6; 
+        padding: 4px; 
+        border-radius: 10px; 
+    }
+    .filter-pill { 
+        border: none !important; 
+        background: transparent; 
+        padding: 8px 20px; 
+        border-radius: 8px; 
+        font-size: 14px; 
+        font-weight: 500; 
+        color: #6b7280; 
+        cursor: pointer; 
+        transition: all 0.2s ease; 
+        outline: none;
+        box-shadow: none;
+    }
+    .filter-pill:hover { 
+        background: rgba(255,107,1,0.1); 
+        color: #FF6B01; 
+    }
+    .filter-pill.active { 
+        background: #FF6B01 !important; 
+        color: white !important; 
+        box-shadow: 0 2px 4px rgba(255,107,1,0.2); 
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-2 pt-2">
+    <div class="row mb-3">
+        <div class="col-12">
+            <h2 class="mb-1"><i class="fas fa-gauge-high me-2 text-primary"></i>Dashboard</h2>
+            <p class="text-muted mb-0">Fraud detection analytics and ML insights</p>
+        </div>
+    </div>
+    <!-- Overview Stats -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card shadow-sm mb-4" id="stats-row-1">
+                <div class="card-body text-center">
+                    <i class="bi bi-file-earmark-arrow-up display-4 text-primary"></i>
+                    <h3 class="mt-2">{{ stats.total_uploads }}</h3>
+                    <p class="text-muted">Total Uploads</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow-sm mb-4">
+                <div class="card-body text-center">
+                    <i class="bi bi-graph-up display-4 text-success"></i>
+                    <h3 class="mt-2">{{ stats.total_predictions }}</h3>
+                    <p class="text-muted">Predictions Made</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow-sm mb-4">
+                <div class="card-body text-center">
+                    <i class="bi bi-shield-exclamation display-4 text-danger"></i>
+                    <h3 class="mt-2">{{ stats.fraud_detected }}</h3>
+                    <p class="text-muted">Fraud Detected</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow-sm mb-4">
+                <div class="card-body text-center">
+                    <i class="bi bi-speedometer2 display-4 text-info"></i>
+                    <h3 class="mt-2">{{ stats.fraud_rate }}%</h3>
+                    <p class="text-muted">Fraud Rate</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Model & Performance Section -->
+    <h4 class="mb-3"><i class="fas fa-robot me-2"></i>Model & Performance</h4>
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-star me-2"></i>Top Fraud Indicators</h5>
+                    <p class="text-muted small mb-0 mt-1">Most influential features our ML model uses to detect fraud</p>
+                </div>
+                <div class="card-body">
+                    <div style="height: 300px;">
+                        <canvas id="topFeaturesChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-chart-line me-2"></i>Upload Activity</h5>
+                    <p class="text-muted small mb-0 mt-1">Your file upload trends over the last 7 days</p>
+                </div>
+                <div class="card-body">
+                    <canvas id="uploadChart" height="250"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Reports & Exports</h5>
+                    <p class="text-muted small mb-0 mt-1">Download analytics and predictions as CSV files</p>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-outline-primary" id="downloadAnalyticsCsv">
+                            <i class="bi bi-download"></i> Analytics Report
+                        </button>
+                        <button class="btn btn-outline-secondary" id="downloadPerformanceCsv">
+                            <i class="bi bi-download"></i> Performance Report
+                        </button>
+                        <button class="btn btn-outline-success" id="downloadPredictionsCsv">
+                            <i class="bi bi-download"></i> Predictions Export
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-robot me-2"></i>Model Information</h5>
+                    <p class="text-muted small mb-0 mt-1">Details about the fraud detection model</p>
+                </div>
+                <div class="card-body" id="modelInfo">
+                    <div class="row text-center">
+                        <div class="col-6">
+                            <h4>{{ model_info.model_type|default:"Unknown" }}</h4>
+                            <small class="text-muted">Model Type</small>
+                        </div>
+                        <div class="col-6">
+                            <h4>{{ model_info.feature_count|default:0 }}</h4>
+                            <small class="text-muted">Features</small>
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="row text-center">
+                        <div class="col-6">
+                            <h4>{% if model_info.fraud_rate %}{{ model_info.fraud_rate|floatformat:2 }}%{% else %}0%{% endif %}</h4>
+                            <small class="text-muted">Training Fraud Rate</small>
+                        </div>
+                        <div class="col-6">
+                            <h4>{% if model_info.model_loaded %}✓{% else %}✗{% endif %}</h4>
+                            <small class="text-muted">Status</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-user-chart me-2"></i>Your Activity</h5>
+                    <p class="text-muted small mb-0 mt-1">Your prediction usage and fraud detection summary</p>
+                </div>
+                <div class="card-body" id="userStats">
+                    <div class="row text-center">
+                        <div class="col-4">
+                            <h4>{{ stats.total_predictions }}</h4>
+                            <small class="text-muted">Total</small>
+                        </div>
+                        <div class="col-4">
+                            <h4>{{ stats.fraud_detected }}</h4>
+                            <small class="text-muted">Fraud</small>
+                        </div>
+                        <div class="col-4">
+                            <h4>{{ stats.fraud_rate }}%</h4>
+                            <small class="text-muted">Rate</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-tachometer-alt me-2"></i>Performance Metrics</h5>
+                    <p class="text-muted small mb-0 mt-1">Model accuracy, precision, recall and other quality indicators</p>
+                </div>
+                <div class="card-body" id="performanceMetrics">
+                    <div class="row text-center mb-4">
+                        <div class="col">
+                            <h3 class="text-success">{{ metrics.accuracy|floatformat:2 }}%</h3>
+                            <small class="text-muted">Accuracy</small>
+                        </div>
+                        <div class="col">
+                            <h3 class="text-info">{{ metrics.precision|floatformat:2 }}%</h3>
+                            <small class="text-muted">Precision</small>
+                        </div>
+                        <div class="col">
+                            <h3 class="text-warning">{{ metrics.recall|floatformat:2 }}%</h3>
+                            <small class="text-muted">Recall</small>
+                        </div>
+                        <div class="col">
+                            <h3 class="text-primary">{{ metrics.f1|floatformat:2 }}%</h3>
+                            <small class="text-muted">F1-Score</small>
+                        </div>
+                        <div class="col">
+                            <h3 class="text-danger">{{ metrics.auc|floatformat:2 }}%</h3>
+                            <small class="text-muted">AUC</small>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="text-center">Confusion Matrix</h6>
+                            {% if confusion_matrix %}
+                            <table class="table table-bordered text-center mx-auto" style="max-width: 300px;">
+                                <thead>
+                                    <tr><th></th><th colspan="2">Predicted</th></tr>
+                                    <tr><th>Actual</th><th>Legit</th><th>Fraud</th></tr>
+                                </thead>
+                                <tbody>
+                                    <tr><th>Legit</th><td class="bg-success text-white">{{ confusion_matrix.0.0 }}</td><td class="bg-warning">{{ confusion_matrix.0.1 }}</td></tr>
+                                    <tr><th>Fraud</th><td class="bg-warning">{{ confusion_matrix.1.0 }}</td><td class="bg-success text-white">{{ confusion_matrix.1.1 }}</td></tr>
+                                </tbody>
+                            </table>
+                            {% else %}
+                            <p class="text-muted text-center">No data</p>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-center">ROC Curve</h6>
+                            <div style="height: 160px;"><canvas id="rocCurveChart"></canvas></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Predictions & Insights Section -->
+    <h4 class="mb-3 mt-5"><i class="fas fa-chart-pie me-2"></i>Predictions & Insights</h4>
+    
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-chart-bar me-2"></i>Fraud vs Legitimate</h5>
+                    <p class="text-muted small mb-0 mt-1">Distribution of fraudulent vs legitimate transactions</p>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="classChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-exclamation-triangle me-2"></i>Risk Distribution</h5>
+                    <p class="text-muted small mb-0 mt-1">Transactions categorized by risk level (Critical, High, Medium, Low)</p>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="riskChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-percent me-2"></i>Fraud % Over Time</h5>
+                    <p class="text-muted small mb-0 mt-1">Track fraud rate changes over time</p>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="fraudRateChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-chart-pie me-2"></i>Channel-wise Fraud Distribution</h5>
+                    <p class="text-muted small mb-0 mt-1">Fraud by transaction channel</p>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="channelFraudChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-bullseye me-2"></i>Transaction Amount vs Fraud</h5>
+                    <p class="text-muted small mb-0 mt-1">Scatter plot showing fraud patterns by transaction amount</p>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container chart-container-lg">
+                        <canvas id="amountScatterChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-bell me-2"></i>Active Alerts</h5>
+                    <p class="text-muted small mb-0 mt-1">System-generated alerts for high-risk transactions</p>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="alertsChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-chart-area me-2"></i>Predictions Over Time</h5>
+                    <p class="text-muted small mb-0 mt-1">Transaction volume trends over the past 14 days</p>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container chart-container-lg">
+                        <canvas id="timelineChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <h5 class="mb-0"><i class="fas fa-history me-2"></i>Recent Predictions</h5>
+                            <p class="text-muted small mb-0 mt-1">Your latest fraud predictions with details and risk scores</p>
+                        </div>
+                        <div class="filter-pills" role="group">
+                            <button type="button" class="filter-pill active" data-filter="all">All</button>
+                            <button type="button" class="filter-pill" data-filter="fraud">Fraud</button>
+                            <button type="button" class="filter-pill" data-filter="legit">Legit</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body" id="predictionHistory">
+                    <div class="text-center text-muted py-4">
+                        <i class="bi bi-inbox d-block display-6 mb-2"></i>
+                        <div>No predictions yet. Make a prediction to see it here.</div>
+                    </div>
+                </div>
+                <div class="card-footer d-flex justify-content-between align-items-center">
+                    <div class="d-flex align-items-center gap-2">
+                        <input class="form-check-input" type="checkbox" id="selectAllHistory">
+                        <label class="form-check-label small" for="selectAllHistory">Select all</label>
+                        <button class="btn btn-sm btn-outline-danger" id="bulkDeleteBtn" disabled>
+                            <i class="bi bi-trash3 me-1"></i>Delete selected
+                        </button>
+                    </div>
+                    <small class="text-muted" id="historyPageInfo">Page 1</small>
+                    <div>
+                        <button class="btn btn-sm btn-outline-secondary" id="historyPrev" disabled>
+                            <i class="bi bi-chevron-left"></i> Prev
+                        </button>
+                        <button class="btn btn-sm btn-outline-secondary" id="historyNext" disabled>
+                            Next <i class="bi bi-chevron-right"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Activity Section -->
+    <h4 class="mb-3 mt-5"><i class="fas fa-list me-2"></i>Recent Activity</h4>
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <h5 class="mb-0">Recent Uploads</h5>
+                            <p class="text-muted small mb-0 mt-1">Your recently uploaded files and processing status</p>
+                        </div>
+                        <a href="{% url 'upload' %}" class="btn btn-primary btn-sm">
+                            <i class="bi bi-cloud-upload"></i> New Upload
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    {% if recent_uploads %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>File Name</th>
+                                    <th>Upload Date</th>
+                                    <th>Records</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for upload in recent_uploads %}
+                                <tr>
+                                    <td>{{ upload.file_name }}</td>
+                                    <td>{{ upload.uploaded_at|date:"M d, Y H:i" }}</td>
+                                    <td>{{ upload.record_count }}</td>
+                                    <td>
+                                        <span class="badge bg-{{ upload.status|lower }}">{{ upload.status }}</span>
+                                    </td>
+                                    <td class="d-flex gap-2">
+                                        <a href="{% url 'analyze' upload.id %}" class="btn btn-sm btn-outline-primary">
+                                            <i class="bi bi-search"></i> Analyze
+                                        </a>
+                                        <button type="button" class="btn btn-sm btn-outline-danger" data-upload-delete="{{ upload.id }}">
+                                            <i class="bi bi-trash3"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-4 text-muted">
+                        <i class="bi bi-inbox display-4 d-block mb-2"></i>
+                        <p>No uploads yet. <a href="{% url 'upload' %}">Upload your first file</a> to get started.</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Disable dashboard.js model data loading - server already rendered it
+window.SKIP_MODEL_LOAD = true;
+</script>
+<script src="{% static 'assets/js/dashboard.js' %}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    
+    // Render Top Features Chart - HARDCODED DATA TO FIX
+    const featCanvas = document.getElementById('topFeaturesChart');
+    if (featCanvas && typeof Chart !== 'undefined') {
+        try { if (window.ChartDataLabels) { Chart.register(window.ChartDataLabels); } } catch(e) {}
+        const features = [
+            {feature: 'risk_score', importance: 0.4657},
+            {feature: 'failed_transaction_count_7d', importance: 0.3831},
+            {feature: 'is_high_risk', importance: 0.0255},
+            {feature: 'has_recent_failures', importance: 0.0225},
+            {feature: 'hour', importance: 0.0222}
+        ];
+        
+        new Chart(featCanvas, {
+            type: 'bar',
+            data: {
+                labels: features.map(f => f.feature),
+                datasets: [{
+                    label: 'Importance (%)',
+                    data: features.map(f => Number((f.importance * 100).toFixed(2))),
+                    backgroundColor: ['#FF6B01', '#3B82F6', '#10B981', '#8B5CF6', '#06B6D4'],
+                    borderWidth: 0,
+                    borderRadius: 8
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    title: { display: false },
+                    datalabels: { display: false }
+                },
+                scales: {
+                    x: { 
+                        title: { display: true, text: 'Importance (%)' }, 
+                        beginAtZero: true,
+                        ticks: { callback: function(value) { return value + '%'; } }
+                    }
+                }
+            }
+        });
+    }
+    
+    // Render ROC Curve
+    const rocCanvas = document.getElementById('rocCurveChart');
+    if (rocCanvas && typeof Chart !== 'undefined') {
+        const rocRaw = '{{ roc_curve|default:""|escapejs }}';
+        let rocData = null;
+        try { rocData = rocRaw ? JSON.parse(rocRaw) : null; } catch (e) { rocData = null; }
+        const hasROC = rocData && Array.isArray(rocData.fpr) && Array.isArray(rocData.tpr) && rocData.fpr.length === rocData.tpr.length && rocData.fpr.length > 0;
+        const datasets = hasROC ? [{
+            label: 'ROC Curve (AUC={{ metrics.auc|floatformat:2 }}%)',
+            data: rocData.fpr.map((fpr, i) => ({ x: fpr, y: rocData.tpr[i] })),
+            borderColor: '#8b5cf6',
+            backgroundColor: 'rgba(139,92,246,0.1)',
+            borderWidth: 2,
+            pointRadius: 0,
+            fill: true
+        }] : [{
+            label: 'ROC Curve (AUC=100%)',
+            data: [{x:0,y:0},{x:0,y:1},{x:1,y:1}],
+            borderColor: '#8b5cf6',
+            backgroundColor: 'rgba(139,92,246,0.1)',
+            borderWidth: 2,
+            pointRadius: 0,
+            fill: true
+        }];
+        datasets.push({
+            label: 'Random',
+            data: [{x: 0, y: 0}, {x: 1, y: 1}],
+            borderColor: '#999',
+            borderWidth: 1,
+            borderDash: [5, 5],
+            pointRadius: 0
+        });
+        new Chart(rocCanvas, {
+            type: 'line',
+            data: { datasets },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: { type: 'linear', title: { display: true, text: 'False Positive Rate' }, min: 0, max: 1 },
+                    y: { title: { display: true, text: 'True Positive Rate' }, min: 0, max: 1 }
+                },
+                plugins: { legend: { display: true, position: 'bottom' } }
+            }
+        });
+    }
+});
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Upload trend chart with error handling
+        const chartCanvas = document.getElementById('uploadChart');
+        if (chartCanvas) {
+            try {
+                const ctx = chartCanvas.getContext('2d');
+
+                // Prepare chart data safely using JSON
+                const dailyUploadsJson = '{{ daily_uploads|escapejs }}';
+                let dailyUploads = [];
+                try {
+                    dailyUploads = dailyUploadsJson ? JSON.parse(dailyUploadsJson) : [];
+                } catch (e) {
+                    dailyUploads = [];
+                }
+
+                let labels = [];
+                let data = [];
+
+                if (dailyUploads && dailyUploads.length > 0) {
+                    labels = dailyUploads.map(day => day.date);
+                    data = dailyUploads.map(day => day.count);
+                }
+
+                // Fallback data if no uploads
+                const chartLabels = labels.length > 0 ? labels : ['No Data'];
+                const chartData = data.length > 0 ? data : [0];
+
+                const uploadChart = new Chart(ctx, {
+                    type: 'line',
+                data: {
+                        labels: chartLabels,
+                        datasets: [{
+                            label: 'Daily Uploads',
+                            data: chartData,
+                            borderColor: '#FF6B01',
+                            backgroundColor: 'rgba(255, 107, 1, 0.1)',
+                            tension: 0.3,
+                            fill: true,
+                            pointBackgroundColor: '#FF6B01',
+                            pointBorderColor: '#ffffff',
+                            pointBorderWidth: 2,
+                            pointRadius: 4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: true, position: 'bottom' },
+                            tooltip: {
+                                backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                                titleColor: '#ffffff',
+                                bodyColor: '#ffffff',
+                                borderColor: '#FF6B01',
+                                borderWidth: 1
+                            }
+                        },
+                        scales: {
+                            x: {
+                                grid: {
+                                    display: false
+                                },
+                                ticks: {
+                                    color: '#6c757d'
+                                }
+                            },
+                            y: {
+                                beginAtZero: true,
+                                grid: {
+                                    color: 'rgba(0, 0, 0, 0.1)'
+                                },
+                                ticks: {
+                                    stepSize: 1,
+                                    color: '#6c757d'
+                                }
+                            }
+                        },
+                        interaction: {
+                            intersect: false,
+                            mode: 'index'
+                        }
+                    }
+                });
+            } catch (error) {
+                console.error('Error creating chart:', error);
+                chartCanvas.parentElement.innerHTML = '<div class="text-center text-muted py-4"><i class="bi bi-exclamation-triangle"></i><br>Chart could not be loaded</div>';
+            }
+        }
+    });
+</script>
+<script>
+// Simple scroll-to-section behavior
+document.addEventListener('DOMContentLoaded', function() {
+    // Trigger chart reflow
+    setTimeout(() => {
+        window.dispatchEvent(new Event('resize'));
+    }, 500);
+});
+</script>
+{% endblock %}

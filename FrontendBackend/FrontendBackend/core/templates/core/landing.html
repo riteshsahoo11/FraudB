@@ -1,0 +1,748 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}FraudB - Advanced Fraud Detection for Financial Institutions{% endblock %}
+
+{% block extra_css %}
+<style>
+/* Hero Section Redesign */
+.hero-section {
+    background: linear-gradient(135deg, rgba(255,107,1,0.08) 0%, rgba(229,90,0,0.12) 100%);
+    background-color: #fff;
+    position: relative;
+    overflow: hidden;
+    padding: 60px 0 80px !important;
+    margin-top: 0 !important;
+}
+
+.hero-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23FF6B01' fill-opacity='0.02'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+}
+
+.hero-content {
+    position: relative;
+    z-index: 2;
+}
+
+.hero-badge {
+    display: inline-block;
+    background: #fff;
+    padding: 8px 20px;
+    border-radius: 50px;
+    color: #FF6B01;
+    font-size: 14px;
+    font-weight: 600;
+    border: 1px solid #FFE5D6;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(255,107,1,0.1);
+}
+
+.hero-badge:hover {
+    background: #FFF5EE;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(255,107,1,0.15);
+}
+
+.hero-title {
+    font-size: 3.5rem;
+    font-weight: 700;
+    color: #1f2937;
+    line-height: 1.2;
+}
+
+.hero-subtitle {
+    font-size: 1.25rem;
+    color: #4b5563;
+    line-height: 1.6;
+    max-width: 600px;
+}
+
+.hero-highlights {
+    list-style: none;
+    padding: 0;
+    margin-bottom: 2rem;
+}
+
+.hero-highlights li {
+    color: #374151;
+    margin-bottom: 12px;
+    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+}
+
+.hero-highlights li i {
+    color: #FF6B01;
+    margin-right: 12px;
+    font-size: 1.3rem;
+}
+
+.btn-hero-primary {
+    display: inline-block;
+    padding: 14px 32px;
+    background: #FF6B01;
+    color: #fff;
+    border-radius: 8px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(255,107,1,0.2);
+    margin-right: 12px;
+    margin-bottom: 12px;
+}
+
+.btn-hero-primary:hover {
+    background: #E55A00;
+    color: #fff;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(255,107,1,0.3);
+}
+
+.btn-hero-secondary {
+    display: inline-block;
+    padding: 14px 32px;
+    background: #fff;
+    color: #1f2937;
+    border-radius: 8px;
+    font-weight: 600;
+    text-decoration: none;
+    border: 2px solid #e5e7eb;
+    transition: all 0.3s ease;
+    margin-bottom: 12px;
+}
+
+.btn-hero-secondary:hover {
+    background: #f9fafb;
+    border-color: #FF6B01;
+    color: #FF6B01;
+    transform: translateY(-2px);
+    box-shadow: 0 2px 8px rgba(255,107,1,0.1);
+}
+
+.trust-badge {
+    width: 50px;
+    height: 50px;
+    background: #fff;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #FF6B01;
+    font-weight: 700;
+    font-size: 16px;
+    border: 2px solid #FFE5D6;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(255,107,1,0.08);
+}
+
+.trust-badge:hover {
+    background: #FFF5EE;
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 4px 12px rgba(255,107,1,0.15);
+}
+
+.floating-card {
+    background: #fff;
+    border-radius: 24px;
+    padding: 40px;
+    border: 2px solid #FFE5D6;
+    box-shadow: 0 4px 16px rgba(255,107,1,0.1);
+    transition: all 0.4s ease;
+}
+
+.floating-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 8px 24px rgba(255,107,1,0.15);
+    border-color: #FF6B01;
+}
+
+.metric-item {
+    text-align: center;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.metric-number {
+    display: block;
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #FF6B01;
+    margin-bottom: 8px;
+}
+
+.metric-label {
+    display: block;
+    font-size: 0.9rem;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* Features Section */
+.features-section {
+    padding: 80px 0;
+    background: #f8f9fa;
+}
+
+.feature-card {
+    padding: 30px;
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    transition: all 0.3s ease;
+    height: 100%;
+    border: 1px solid #e5e7eb;
+}
+
+.feature-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 8px 24px rgba(255,107,1,0.15);
+    border-color: #FF6B01;
+}
+
+.feature-icon {
+    width: 70px;
+    height: 70px;
+    background: linear-gradient(135deg, #FF6B01 0%, #E55A00 100%);
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 20px;
+    transition: all 0.3s ease;
+}
+
+.feature-card:hover .feature-icon {
+    transform: scale(1.1) rotate(5deg);
+}
+
+.feature-icon i {
+    font-size: 2rem;
+    color: #fff;
+}
+
+.feature-card h4 {
+    font-weight: 600;
+    margin-bottom: 12px;
+    color: #1f2937;
+}
+
+.feature-card p {
+    color: #6b7280;
+    line-height: 1.6;
+    margin: 0;
+}
+
+.section-header {
+    text-align: center;
+    margin-bottom: 60px;
+}
+
+.section-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #1f2937;
+    margin-bottom: 16px;
+}
+
+.section-subtitle {
+    font-size: 1.1rem;
+    color: #6b7280;
+    max-width: 700px;
+    margin: 0 auto;
+}
+
+/* Stats Section */
+.stats-section {
+    background: #f9fafb;
+    padding: 60px 0;
+}
+
+.stat-card {
+    text-align: center;
+    padding: 30px;
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    border: 1px solid #e5e7eb;
+    transition: all 0.3s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 24px rgba(255,107,1,0.15);
+    border-color: #FF6B01;
+}
+
+.stat-number {
+    display: block;
+    font-size: 3rem;
+    font-weight: 700;
+    margin-bottom: 8px;
+    color: #FF6B01;
+}
+
+.stat-label {
+    display: block;
+    font-size: 1rem;
+    color: #6b7280;
+    font-weight: 500;
+}
+
+/* CTA Section */
+.cta-section {
+    padding: 80px 0;
+    background: #f8f9fa;
+}
+
+.cta-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #1f2937;
+    margin-bottom: 20px;
+}
+
+.cta-subtitle {
+    font-size: 1.2rem;
+    color: #6b7280;
+    margin-bottom: 32px;
+}
+
+.btn-cta {
+    display: inline-block;
+    padding: 16px 40px;
+    background: linear-gradient(135deg, #FF6B01 0%, #E55A00 100%);
+    color: #fff;
+    border-radius: 50px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(255,107,1,0.3);
+}
+
+.btn-cta:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(255,107,1,0.4);
+    color: #fff;
+}
+
+/* Use Case Cards */
+.use-case-card {
+    background: #fff;
+    padding: 32px;
+    border-radius: 16px;
+    border: 2px solid #e5e7eb;
+    height: 100%;
+    transition: all 0.3s ease;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.use-case-card:hover {
+    border-color: #FF6B01;
+    box-shadow: 0 8px 24px rgba(255,107,1,0.12);
+    transform: translateY(-4px);
+}
+
+.use-case-icon {
+    width: 56px;
+    height: 56px;
+    background: linear-gradient(135deg, #FFF5EE 0%, #FFE5D6 100%);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+.use-case-icon i {
+    font-size: 24px;
+    color: #FF6B01;
+}
+
+.use-case-card h4 {
+    margin-bottom: 16px;
+    font-weight: 600;
+    color: #1f2937;
+    font-size: 1.25rem;
+}
+
+.use-case-card p {
+    color: #6b7280;
+    margin-bottom: 16px;
+    line-height: 1.6;
+}
+
+.use-case-card ul {
+    color: #6b7280;
+    margin: 0;
+    padding-left: 20px;
+    list-style: none;
+}
+
+.use-case-card ul li {
+    margin-bottom: 8px;
+    position: relative;
+    padding-left: 24px;
+}
+
+.use-case-card ul li:before {
+    content: "✓";
+    position: absolute;
+    left: 0;
+    color: #FF6B01;
+    font-weight: bold;
+}
+
+@media (max-width: 992px) {
+    .hero-title {
+        font-size: 2.5rem;
+    }
+    .hero-subtitle {
+        font-size: 1.1rem;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="container-fluid px-4 px-lg-5">
+        <div class="row align-items-center py-5">
+            <div class="col-lg-6">
+                <div class="hero-content">
+                    <div class="hero-badge mb-4">
+                        <i class="bi bi-shield-check me-2"></i>Advanced AI-Powered Detection
+                    </div>
+                    <h1 class="hero-title mb-4">
+                        Advanced Fraud Detection for 
+                        <span style="color: #FF6B01;">Financial Institutions</span>
+                    </h1>
+                    <p class="hero-subtitle mb-5">
+                        Leverage cutting-edge AI and machine learning to detect fraudulent transactions in real-time, 
+                        protecting your institution and customers with 99.7% accuracy.
+                    </p>
+                    <ul class="hero-highlights">
+                        <li><i class="bi bi-lightning-charge-fill"></i> Real-time detection under 100ms</li>
+                        <li><i class="bi bi-shield-lock-fill"></i> Bank-grade security & compliance</li>
+                        <li><i class="bi bi-graph-up-arrow"></i> Actionable analytics dashboards</li>
+                    </ul>
+                    <div class="hero-cta">
+                        {% if user.is_authenticated %}
+                        <a href="{% url 'dashboard' %}" class="btn-hero-primary">
+                            <i class="bi bi-speedometer2 me-2"></i>Go to Dashboard
+                        </a>
+                        {% else %}
+                        <a href="{% url 'signup' %}" class="btn-hero-primary">
+                            <i class="bi bi-rocket-takeoff me-2"></i>
+                            Start Free Trial
+                        </a>
+                        {% endif %}
+                        <a href="#features" class="btn-hero-secondary">
+                            <i class="bi bi-play-circle me-2"></i>
+                            Learn More
+                        </a>
+                    </div>
+                    <div class="hero-trust mt-4">
+                        <div class="d-flex align-items-center gap-3 flex-wrap">
+                            <div class="trust-badge"><span>AB</span></div>
+                            <div class="trust-badge"><span>NB</span></div>
+                            <div class="trust-badge"><span>FB</span></div>
+                            <div class="trust-badge"><span>MB</span></div>
+                            <span class="text-muted small">Trusted by 500+ institutions</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="hero-visual">
+                    <div class="floating-card">
+                        <div class="row">
+                            <div class="col-6">
+                                <div class="metric-item">
+                                    <span class="metric-number">99.7%</span>
+                                    <span class="metric-label">Accuracy</span>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="metric-item">
+                                    <span class="metric-number">2.3ms</span>
+                                    <span class="metric-label">Response</span>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="metric-item">
+                                    <span class="metric-number">$2.4B</span>
+                                    <span class="metric-label">Protected</span>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="metric-item">
+                                    <span class="metric-number">24/7</span>
+                                    <span class="metric-label">Monitoring</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section id="features" class="features-section">
+    <div class="container">
+        <div class="section-header">
+            <h2 class="section-title">Powerful Features</h2>
+            <p class="section-subtitle">
+                Comprehensive fraud detection and risk management tools designed for the modern financial landscape
+            </p>
+        </div>
+        <div class="row g-4">
+            <div class="col-lg-4 col-md-6">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="bi bi-cpu"></i>
+                    </div>
+                    <h4>AI-Powered Detection</h4>
+                    <p>Advanced machine learning algorithms analyze transaction patterns in real-time to identify suspicious activities.</p>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="bi bi-graph-up-arrow"></i>
+                    </div>
+                    <h4>Predictive Analytics</h4>
+                    <p>Forecast potential risks and market trends using sophisticated predictive models.</p>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="bi bi-shield-lock"></i>
+                    </div>
+                    <h4>Enterprise Security</h4>
+                    <p>Bank-grade security with end-to-end encryption and compliance with global financial regulations.</p>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="bi bi-speedometer2"></i>
+                    </div>
+                    <h4>Real-time Monitoring</h4>
+                    <p>Monitor transactions as they happen with instant alerts and automated responses 24/7.</p>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="bi bi-bar-chart-line"></i>
+                    </div>
+                    <h4>Advanced Analytics</h4>
+                    <p>Comprehensive dashboards and reporting tools provide deep insights into transaction patterns.</p>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="bi bi-gear"></i>
+                    </div>
+                    <h4>Easy Integration</h4>
+                    <p>Seamlessly integrate with existing banking systems through our robust API.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Stats Section -->
+<section class="stats-section">
+    <div class="container">
+        <div class="row g-4">
+            <div class="col-lg-3 col-md-6">
+                <div class="stat-card">
+                    <span class="stat-number">99.7%</span>
+                    <span class="stat-label">Detection Accuracy</span>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="stat-card">
+                    <span class="stat-number">2.3ms</span>
+                    <span class="stat-label">Response Time</span>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="stat-card">
+                    <span class="stat-number">$2.4B</span>
+                    <span class="stat-label">Fraud Prevented</span>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="stat-card">
+                    <span class="stat-number">500+</span>
+                    <span class="stat-label">Institutions</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- How It Works Section -->
+<section class="how-it-works-section" style="padding: 80px 0; background: #fff;">
+    <div class="container">
+        <div class="section-header">
+            <h2 class="section-title">How It Works</h2>
+            <p class="section-subtitle">
+                Our AI-powered fraud detection system works in three simple steps to protect your transactions
+            </p>
+        </div>
+        <div class="row g-4">
+            <div class="col-lg-4">
+                <div class="text-center">
+                    <div style="width: 80px; height: 80px; background: linear-gradient(135deg, #FF6B01 0%, #E55A00 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 24px; box-shadow: 0 4px 16px rgba(255,107,1,0.2);">
+                        <span style="font-size: 2rem; color: #fff; font-weight: 700;">1</span>
+                    </div>
+                    <h4 style="margin-bottom: 16px; font-weight: 600; color: #1f2937;">Data Collection</h4>
+                    <p style="color: #6b7280; line-height: 1.6;">
+                        Upload transaction data through our secure API or dashboard interface. Supports CSV, JSON, and direct integrations.
+                    </p>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="text-center">
+                    <div style="width: 80px; height: 80px; background: linear-gradient(135deg, #FF6B01 0%, #E55A00 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 24px; box-shadow: 0 4px 16px rgba(255,107,1,0.2);">
+                        <span style="font-size: 2rem; color: #fff; font-weight: 700;">2</span>
+                    </div>
+                    <h4 style="margin-bottom: 16px; font-weight: 600; color: #1f2937;">AI Analysis</h4>
+                    <p style="color: #6b7280; line-height: 1.6;">
+                        Our machine learning models analyze patterns, behaviors, and anomalies in real-time to detect potential fraud.
+                    </p>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="text-center">
+                    <div style="width: 80px; height: 80px; background: linear-gradient(135deg, #FF6B01 0%, #E55A00 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 24px; box-shadow: 0 4px 16px rgba(255,107,1,0.2);">
+                        <span style="font-size: 2rem; color: #fff; font-weight: 700;">3</span>
+                    </div>
+                    <h4 style="margin-bottom: 16px; font-weight: 600; color: #1f2937;">Instant Alerts</h4>
+                    <p style="color: #6b7280; line-height: 1.6;">
+                        Receive immediate notifications for suspicious activities with detailed risk scores and recommended actions.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Use Cases Section -->
+<section class="use-cases-section" style="padding: 80px 0; background: #f9fafb;">
+    <div class="container">
+        <div class="section-header">
+            <h2 class="section-title">Trusted Across Industries</h2>
+            <p class="section-subtitle">
+                From retail banking to fintech startups, our platform adapts to your specific fraud detection needs
+            </p>
+        </div>
+        <div class="row g-4">
+            <div class="col-lg-6">
+                <div class="use-case-card">
+                    <div class="use-case-icon">
+                        <i class="bi bi-bank"></i>
+                    </div>
+                    <h4>Retail Banking</h4>
+                    <p>
+                        Monitor millions of daily transactions, detect card fraud, and protect customer accounts with real-time alerts.
+                    </p>
+                    <ul>
+                        <li>Credit & debit card fraud detection</li>
+                        <li>Account takeover prevention</li>
+                        <li>Wire transfer monitoring</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="use-case-card">
+                    <div class="use-case-icon">
+                        <i class="bi bi-phone"></i>
+                    </div>
+                    <h4>Digital Payments</h4>
+                    <p>
+                        Secure mobile wallets, P2P transfers, and online payment gateways with advanced fraud prevention.
+                    </p>
+                    <ul>
+                        <li>Mobile wallet security</li>
+                        <li>P2P fraud prevention</li>
+                        <li>Payment gateway protection</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="use-case-card">
+                    <div class="use-case-icon">
+                        <i class="bi bi-cart3"></i>
+                    </div>
+                    <h4>E-Commerce</h4>
+                    <p>
+                        Protect your online store from chargeback fraud, account takeovers, and stolen credit card transactions.
+                    </p>
+                    <ul>
+                        <li>Chargeback prevention</li>
+                        <li>Stolen card detection</li>
+                        <li>Promo abuse prevention</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="use-case-card">
+                    <div class="use-case-icon">
+                        <i class="bi bi-graph-up"></i>
+                    </div>
+                    <h4>Investment Platforms</h4>
+                    <p>
+                        Secure trading activities, detect insider trading patterns, and prevent account manipulation.
+                    </p>
+                    <ul>
+                        <li>Trading fraud detection</li>
+                        <li>Account security monitoring</li>
+                        <li>Suspicious pattern alerts</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section id="about" class="cta-section">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8 text-center">
+                <h2 class="cta-title">Ready to Secure Your Transactions?</h2>
+                <p class="cta-subtitle">
+                    Join hundreds of financial institutions already using our platform to protect billions in transactions daily.
+                </p>
+                {% if user.is_authenticated %}
+                <a href="{% url 'dashboard' %}" class="btn-cta">
+                    <i class="bi bi-speedometer2 me-2"></i>
+                    Go to Dashboard
+                </a>
+                {% else %}
+                <a href="{% url 'signup' %}" class="btn-cta">
+                    <i class="bi bi-arrow-right-circle me-2"></i>
+                    Get Started Today
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

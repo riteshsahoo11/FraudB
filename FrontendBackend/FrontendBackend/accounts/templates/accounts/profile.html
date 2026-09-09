@@ -1,0 +1,825 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}My Profile - BFSI Transaction Monitoring{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'assets/css/profile-modern.css' %}">
+<style>
+  /* Delete modal polish */
+  #deleteAccountModal .modal-content { border-radius: 14px; overflow: hidden; }
+  #deleteAccountModal .modal-header { border-bottom: 0; }
+  #deleteAccountModal .modal-body ul { margin-left: 1rem; }
+  #deleteAccountModal .btn-danger { background-color: #dc2626; border-color: #dc2626; }
+  #deleteAccountModal .btn-danger:hover { background-color: #b91c1c; border-color: #b91c1c; }
+  #deleteAccountModal .form-control { border-radius: 10px; }
+  #deleteAccountModal .btn-secondary { border-radius: 10px; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <!-- Profile Sidebar -->
+        <div class="col-lg-4 mb-4">
+            <div class="card shadow-sm border-0 rounded-4">
+                <div class="card-body text-center p-4">
+                    <div class="position-relative d-inline-block mb-3">
+                        {% if user.avatar_file_id %}
+                        <img src="{% url 'avatar_image' user.avatar_file_id %}" alt="Avatar" class="mx-auto d-block"
+                            style="width: 120px; height: 120px; border-radius: 50%; object-fit: cover;">
+                        {% else %}
+                        <div class="avatar-circle bg-primary text-white d-flex align-items-center justify-content-center mx-auto"
+                            style="width: 120px; height: 120px; font-size: 3rem; border-radius: 50%;">
+                            <i class="bi bi-person-fill"></i>
+                        </div>
+                        {% endif %}
+                        <form method="post" action="{% url 'avatar_upload' %}" enctype="multipart/form-data"
+                            id="avatarUploadForm" class="d-none">
+                            {% csrf_token %}
+                            <input type="file" name="avatar" id="avatarInput" accept="image/*">
+                        </form>
+                        <button type="button" id="avatarButton" class="avatar-upload-btn" title="Change Avatar">
+                            <i class="bi bi-camera-fill"></i>
+                        </button>
+                    </div>
+
+                    <h4 class="mb-1">{{ user.username }}</h4>
+                    <p class="text-muted mb-3">{{ user.email }}</p>
+
+                    <div class="d-flex justify-content-center gap-2 mb-3">
+                        <span class="badge bg-success">Active</span>
+                        {% if user.is_staff %}
+                        <span class="badge bg-info">Staff</span>
+                        {% endif %}
+                        {% if user.is_superuser %}
+                        <span class="badge bg-danger">Admin</span>
+                        {% endif %}
+                    </div>
+
+                    <hr>
+
+                    <div class="text-start">
+                        <p class="mb-2">
+                            <i class="bi bi-calendar-check text-muted"></i>
+                            <strong>Joined:</strong> {{ user.date_joined|date:"F d, Y" }}
+                        </p>
+                        <p class="mb-2">
+                            <i class="bi bi-clock text-muted"></i>
+                            <strong>Last Login:</strong> {{ user.last_login|date:"F d, Y H:i" }}
+                        </p>
+                        <p class="mb-0">
+                            <i class="bi bi-shield-check text-muted"></i>
+                            <strong>Account Status:</strong>
+                            {% if user.is_active %}
+                            <span class="text-success">Verified</span>
+                            {% else %}
+                            <span class="text-warning">Pending Verification</span>
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="card shadow-sm border-0 rounded-4 mt-3">
+                <div class="card-body">
+                    <h6 class="card-title mb-3">Quick Actions</h6>
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'change_password' %}" class="btn btn-outline-primary btn-sm">
+                            <i class="bi bi-key-fill"></i> Change Password
+                        </a>
+                        <a href="{% url 'logout' %}" class="btn btn-outline-danger btn-sm">
+                            <i class="bi bi-box-arrow-right"></i> Sign Out
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Profile Content -->
+        <div class="col-lg-8">
+
+            <!-- Personal Information -->
+            <div class="card shadow-sm border-0 rounded-4 mb-4">
+                <div class="card-header border-0 p-4 d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="bi bi-person-lines-fill text-primary"></i> Personal Information
+                    </h5>
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" id="editToggle">
+                        <label class="form-check-label" for="editToggle">Edit Profile</label>
+                    </div>
+                </div>
+                <div class="card-body p-4">
+                    <form method="post" action="{% url 'profile' %}" class="needs-validation" novalidate
+                        id="profileForm">
+                        {% csrf_token %}
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.first_name.id_for_label }}" class="form-label">First Name</label>
+                                {{ form.first_name }}
+                                {% if form.first_name.errors %}
+                                <div class="text-danger small mt-1">{{ form.first_name.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.last_name.id_for_label }}" class="form-label">Last Name</label>
+                                {{ form.last_name }}
+                                {% if form.last_name.errors %}
+                                <div class="text-danger small mt-1">{{ form.last_name.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.organization.id_for_label }}"
+                                    class="form-label">Organization</label>
+                                {{ form.organization }}
+                                {% if form.organization.errors %}
+                                <div class="text-danger small mt-1">{{ form.organization.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.department.id_for_label }}" class="form-label">Department</label>
+                                {{ form.department }}
+                                {% if form.department.errors %}
+                                <div class="text-danger small mt-1">{{ form.department.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.phone_number.id_for_label }}" class="form-label">Phone Number</label>
+                            {{ form.phone_number }}
+                            {% if form.phone_number.errors %}
+                            <div class="text-danger small mt-1">{{ form.phone_number.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email Address</label>
+                            <input type="email" class="form-control" id="email" name="email" value="{{ user.email }}"
+                                placeholder="Enter email address" readonly>
+                            <small class="text-muted">Email cannot be changed. Contact support if needed.</small>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.username.id_for_label }}" class="form-label">Username</label>
+                            {{ form.username }}
+                            {% if form.username.errors %}
+                            <div class="text-danger small mt-1">{{ form.username.errors.0 }}</div>
+                            {% endif %}
+                            <small class="text-muted">Use letters, numbers, and underscores only.</small>
+                        </div>
+
+                        <div class="d-flex justify-content-end">
+                            <button type="submit" class="btn btn-primary" id="updateBtn" disabled>
+                                <i class="bi bi-check-circle"></i> Update Profile
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Activity Summary -->
+            <div class="card shadow-sm border-0 rounded-4 mb-4">
+                <div class="card-header border-0 p-4">
+                    <h5 class="mb-0">
+                        <i class="bi bi-graph-up text-primary"></i> Activity Summary
+                    </h5>
+                </div>
+                <div class="card-body p-4">
+                    <div class="row text-center">
+                        <div class="col-md-3 col-6 mb-3">
+                            <div class="p-3 bg-light rounded-3">
+                                <h4 id="profileTransactions" class="mb-1 text-primary">0</h4>
+                                <small class="text-muted">Transactions</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-6 mb-3">
+                            <div class="p-3 bg-light rounded-3">
+                                <h4 id="profilePredictions" class="mb-1 text-success">0</h4>
+                                <small class="text-muted">Predictions</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-6 mb-3">
+                            <div class="p-3 bg-light rounded-3">
+                                <h4 id="profileAlerts" class="mb-1 text-warning">0</h4>
+                                <small class="text-muted">Alerts</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-6 mb-3">
+                            <div class="p-3 bg-light rounded-3">
+                                <h4 id="profileReports" class="mb-1 text-info">0</h4>
+                                <small class="text-muted">Reports</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Data Exports & Reports -->
+            <div class="card shadow-sm border-0 rounded-4">
+                <div class="card-header border-0 p-4 d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="bi bi-download text-primary"></i> Data Exports & Reports
+                    </h5>
+                </div>
+                <div class="card-body p-4">
+                    <div class="d-grid gap-2">
+                        <a class="btn btn-outline-primary" href="/api/transactions?format=csv&page=1&page_size=10000">
+                            <i class="bi bi-filetype-csv"></i> Download My Predictions (CSV)
+                        </a>
+                        <a class="btn btn-outline-secondary" href="/api/analytics?format=csv">
+                            <i class="bi bi-graph-down"></i> Download Analytics Summary (CSV)
+                        </a>
+                        <a class="btn btn-outline-dark" href="/accounts/export/">
+                            <i class="bi bi-filetype-json"></i> Download My Profile (JSON)
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- n8n Webhook Integration -->
+            <div class="card shadow-sm border-0 rounded-4 mt-4">
+                <div class="card-header border-0 p-4 d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="bi bi-link-45deg text-primary"></i> n8n Webhook Integration
+                    </h5>
+                </div>
+                <div class="card-body p-4">
+                    <p class="small text-muted mb-3">
+                        Enable webhook integration to send fraud predictions to your n8n workflows in real-time.
+                    </p>
+                    <div class="form-check form-switch mb-3">
+                        <input class="form-check-input" type="checkbox" id="n8nEnabled">
+                        <label class="form-check-label" for="n8nEnabled">
+                            <strong>Enable n8n Integration</strong>
+                        </label>
+                    </div>
+                    <div id="n8nConfig" style="display: none;">
+                        <div class="mb-3">
+                            <label for="n8nWebhookUrl" class="form-label small">Webhook URL</label>
+                            <input type="url" class="form-control form-control-sm" id="n8nWebhookUrl" 
+                                placeholder="https://your-n8n-instance.com/webhook/...">
+                            <div class="form-text">Your n8n webhook endpoint URL</div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small">Send Data For:</label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="n8nSendFraud" checked>
+                                <label class="form-check-label small" for="n8nSendFraud">
+                                    Fraudulent transactions only
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="n8nSendAll">
+                                <label class="form-check-label small" for="n8nSendAll">
+                                    All predictions
+                                </label>
+                            </div>
+                        </div>
+                        <button class="btn btn-sm btn-outline-primary" id="testN8nWebhook">
+                            <i class="bi bi-send"></i> Test Connection
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Danger Zone -->
+            <div class="card shadow-sm border-0 rounded-4 mt-4">
+                <div class="card-header border-0 p-4 d-flex align-items-center">
+                    <h5 class="mb-0 text-danger">
+                        <i class="bi bi-trash text-danger"></i> Danger Zone
+                    </h5>
+                </div>
+                <div class="card-body p-4">
+                    <p class="small text-muted mb-3">
+                        Permanently delete your account and all associated data. This action cannot be undone.
+                    </p>
+                    <button class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteAccountModal">
+                        <i class="bi bi-exclamation-triangle"></i> Delete My Account
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Settings Modal -->
+<div class="modal fade" id="settingsModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Account Settings</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Notification Preferences -->
+                <div class="settings-section mb-4">
+                    <div class="d-flex align-items-center mb-3">
+                        <i class="bi bi-bell text-primary me-2 fs-5"></i>
+                        <h6 class="mb-0">Notification Preferences</h6>
+                    </div>
+                    <div class="ps-4">
+                        <div class="form-check form-switch mb-2">
+                            <input class="form-check-input" type="checkbox" id="emailNotifications" checked>
+                            <label class="form-check-label" for="emailNotifications">
+                                Email notifications for fraud alerts
+                            </label>
+                        </div>
+                        <div class="form-check form-switch mb-2">
+                            <input class="form-check-input" type="checkbox" id="highRiskAlerts" checked>
+                            <label class="form-check-label" for="highRiskAlerts">
+                                Instant alerts for high-risk transactions
+                            </label>
+                        </div>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="weeklyReports">
+                            <label class="form-check-label" for="weeklyReports">
+                                Weekly summary reports
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <hr>
+
+                <!-- n8n Webhook Integration -->
+                <div class="settings-section mb-4">
+                    <div class="d-flex align-items-center mb-3">
+                        <i class="bi bi-link-45deg text-primary me-2 fs-5"></i>
+                        <h6 class="mb-0">n8n Webhook Integration</h6>
+                    </div>
+                    <div class="ps-4">
+                        <p class="small text-muted mb-3">
+                            Enable webhook integration to send fraud predictions to your n8n workflows in real-time.
+                        </p>
+                        <div class="form-check form-switch mb-3">
+                            <input class="form-check-input" type="checkbox" id="n8nEnabled">
+                            <label class="form-check-label" for="n8nEnabled">
+                                <strong>Enable n8n Integration</strong>
+                            </label>
+                        </div>
+                        <div id="n8nConfig" style="display: none;">
+                            <div class="mb-3">
+                                <label for="n8nWebhookUrl" class="form-label small">Webhook URL</label>
+                                <input type="url" class="form-control form-control-sm" id="n8nWebhookUrl" 
+                                    placeholder="https://your-n8n-instance.com/webhook/...">
+                                <div class="form-text">Your n8n webhook endpoint URL</div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label small">Send Data For:</label>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="n8nSendFraud" checked>
+                                    <label class="form-check-label small" for="n8nSendFraud">
+                                        Fraudulent transactions only
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="n8nSendAll">
+                                    <label class="form-check-label small" for="n8nSendAll">
+                                        All predictions
+                                    </label>
+                                </div>
+                            </div>
+                            <button class="btn btn-sm btn-outline-primary" id="testN8nWebhook">
+                                <i class="bi bi-send"></i> Test Connection
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <hr>
+
+                <!-- Language & Region -->
+                <div class="settings-section mb-4">
+                    <div class="d-flex align-items-center mb-3">
+                        <i class="bi bi-globe text-primary me-2 fs-5"></i>
+                        <h6 class="mb-0">Language & Region</h6>
+                    </div>
+                    <div class="ps-4">
+                        <div class="mb-3">
+                            <label for="languageSelect" class="form-label small">Language</label>
+                            <select class="form-select form-select-sm" id="languageSelect">
+                                <option value="en" selected>English</option>
+                                <option value="es">Español</option>
+                                <option value="fr">Français</option>
+                                <option value="de">Deutsch</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="timezoneSelect" class="form-label small">Timezone</label>
+                            <select class="form-select form-select-sm" id="timezoneSelect">
+                                <option value="Asia/Kolkata" selected>Asia/Kolkata (IST)</option>
+                                <option value="America/New_York">America/New York (EST)</option>
+                                <option value="Europe/London">Europe/London (GMT)</option>
+                                <option value="Asia/Tokyo">Asia/Tokyo (JST)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <hr>
+
+                <!-- Privacy Settings -->
+                <div class="settings-section mb-4">
+                    <div class="d-flex align-items-center mb-3">
+                        <i class="bi bi-eye text-primary me-2 fs-5"></i>
+                        <h6 class="mb-0">Privacy Settings</h6>
+                    </div>
+                    <div class="ps-4">
+                        <div class="form-check form-switch mb-2">
+                            <input class="form-check-input" type="checkbox" id="profileVisibility">
+                            <label class="form-check-label" for="profileVisibility">
+                                Make profile visible to team members
+                            </label>
+                        </div>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="activityTracking" checked>
+                            <label class="form-check-label" for="activityTracking">
+                                Enable activity tracking for analytics
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <hr>
+
+                <!-- Data Management -->
+                <div class="settings-section mb-4">
+                    <div class="d-flex align-items-center mb-3">
+                        <i class="bi bi-download text-primary me-2 fs-5"></i>
+                        <h6 class="mb-0">Download Your Data</h6>
+                    </div>
+                    <div class="ps-4">
+                        <p class="small text-muted mb-3">
+                            Request a copy of your data including predictions, uploads, and account information.
+                        </p>
+                        <button class="btn btn-sm btn-outline-primary" id="requestDataExport">
+                            <i class="bi bi-file-earmark-arrow-down"></i> Request Data Export
+                        </button>
+                    </div>
+                </div>
+                <hr>
+
+                <!-- Danger Zone -->
+                <div class="settings-section">
+                    <div class="d-flex align-items-center mb-3">
+                        <i class="bi bi-trash text-danger me-2 fs-5"></i>
+                        <h6 class="mb-0 text-danger">Delete Account</h6>
+                    </div>
+                    <div class="ps-4">
+                        <p class="small text-muted mb-3">
+                            Permanently delete your account and all associated data. This action cannot be undone.
+                        </p>
+                        <button class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteAccountModal">
+                            <i class="bi bi-exclamation-triangle"></i> Delete My Account
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="saveSettings">
+                    <i class="bi bi-check-lg"></i> Save Settings
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Account Confirmation Modal -->
+<div class="modal fade" id="deleteAccountModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title"><i class="bi bi-exclamation-triangle"></i> Confirm Account Deletion</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p class="fw-bold">Are you absolutely sure you want to delete your account?</p>
+                <p>This will permanently delete:</p>
+                <ul>
+                    <li>Your profile and account information</li>
+                    <li>All prediction history</li>
+                    <li>Uploaded files and batch results</li>
+                    <li>Analytics and reports</li>
+                </ul>
+                <p class="text-danger"><strong>This action cannot be undone.</strong></p>
+                <div class="mb-3">
+                    <label for="deleteConfirmation" class="form-label">Type <strong>DELETE</strong> to confirm:</label>
+                    <input type="text" class="form-control" id="deleteConfirmation" placeholder="DELETE">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger" id="confirmDeleteAccount" disabled>
+                    <i class="bi bi-trash"></i> Delete Account
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    // Avatar upload handlers
+    const avatarBtn = document.getElementById('avatarButton');
+    const avatarInput = document.getElementById('avatarInput');
+    const avatarForm = document.getElementById('avatarUploadForm');
+    if (avatarBtn && avatarInput && avatarForm) {
+        avatarBtn.addEventListener('click', function () {
+            avatarInput.click();
+        });
+        avatarInput.addEventListener('change', function () {
+            if (avatarInput.files && avatarInput.files[0]) {
+                avatarForm.submit();
+            }
+        });
+    }
+
+    // Edit toggle for profile fields
+    const editToggle = document.getElementById('editToggle');
+    const profileForm = document.getElementById('profileForm');
+    const updateBtn = document.getElementById('updateBtn');
+
+    function setFormDisabled(disabled) {
+        if (!profileForm) return;
+        const inputs = profileForm.querySelectorAll('input.form-control');
+        inputs.forEach(inp => {
+            if (inp.name && inp.name !== 'csrfmiddlewaretoken') {
+                inp.disabled = disabled;
+            }
+        });
+        if (updateBtn) updateBtn.disabled = disabled;
+    }
+
+    // Disable fields by default
+    setFormDisabled(true);
+    if (editToggle) {
+        editToggle.addEventListener('change', function () {
+            setFormDisabled(!this.checked);
+        });
+    }
+
+    async function savePreferences(payload) {
+        try {
+            const res = await fetch('/accounts/preferences/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': (document.querySelector('[name=csrfmiddlewaretoken]')?.value || '')
+                },
+                body: JSON.stringify(payload)
+            });
+            const j = await res.json();
+            if (res.ok && j.success) {
+                showToast('Preferences saved', 'success');
+            } else {
+                showToast(j.message || 'Failed to save preferences', 'danger');
+            }
+        } catch (e) {
+            showToast('Network error saving preferences', 'danger');
+        }
+    }
+
+    function readPreferences() {
+        const twoFactor = document.getElementById('twoFactorAuth')?.checked || false;
+        const loginAlerts = document.getElementById('loginAlerts')?.checked || false;
+        const timeoutSelect = document.querySelector('select');
+        const sessionTimeout = timeoutSelect ? parseInt(timeoutSelect.value) : 30;
+        return {
+            two_factor_auth: twoFactor,
+            login_alerts: loginAlerts,
+            session_timeout: sessionTimeout
+        };
+    }
+
+    // Persist toggles
+    const twoFactorToggle = document.getElementById('twoFactorAuth');
+    const loginAlertsToggle = document.getElementById('loginAlerts');
+    [twoFactorToggle, loginAlertsToggle].forEach(toggle => {
+        if (toggle) {
+            toggle.addEventListener('change', function () {
+                const payload = readPreferences();
+                savePreferences(payload);
+            });
+        }
+    });
+
+    const sessionTimeoutSelect = document.querySelector('select');
+    if (sessionTimeoutSelect) {
+        sessionTimeoutSelect.addEventListener('change', function () {
+            const payload = readPreferences();
+            savePreferences(payload);
+            showToast(`Session timeout updated to ${payload.session_timeout} minutes`, 'success');
+        });
+    }
+
+    // Settings Modal - n8n Toggle
+    const n8nToggle = document.getElementById('n8nEnabled');
+    const n8nConfig = document.getElementById('n8nConfig');
+    if (n8nToggle && n8nConfig) {
+        n8nToggle.addEventListener('change', function() {
+            n8nConfig.style.display = this.checked ? 'block' : 'none';
+        });
+    }
+
+    // Save Settings Button
+    const saveSettingsBtn = document.getElementById('saveSettings');
+    if (saveSettingsBtn) {
+        saveSettingsBtn.addEventListener('click', async function() {
+            const settings = {
+                notifications: {
+                    email: document.getElementById('emailNotifications')?.checked || false,
+                    highRisk: document.getElementById('highRiskAlerts')?.checked || false,
+                    weeklyReports: document.getElementById('weeklyReports')?.checked || false
+                },
+                n8n: {
+                    enabled: document.getElementById('n8nEnabled')?.checked || false,
+                    webhookUrl: document.getElementById('n8nWebhookUrl')?.value || '',
+                    sendFraud: document.getElementById('n8nSendFraud')?.checked || false,
+                    sendAll: document.getElementById('n8nSendAll')?.checked || false
+                },
+                language: document.getElementById('languageSelect')?.value || 'en',
+                timezone: document.getElementById('timezoneSelect')?.value || 'Asia/Kolkata',
+                privacy: {
+                    profileVisibility: document.getElementById('profileVisibility')?.checked || false,
+                    activityTracking: document.getElementById('activityTracking')?.checked || false
+                }
+            };
+
+            try {
+                const res = await fetch('/accounts/preferences/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': (document.querySelector('[name=csrfmiddlewaretoken]')?.value || '')
+                    },
+                    body: JSON.stringify(settings)
+                });
+                const j = await res.json();
+                if (res.ok && j.success) {
+                    showToast('Settings saved successfully', 'success');
+                    bootstrap.Modal.getInstance(document.getElementById('settingsModal')).hide();
+                } else {
+                    showToast(j.message || 'Failed to save settings', 'danger');
+                }
+            } catch (e) {
+                showToast('Network error saving settings', 'danger');
+            }
+        });
+    }
+
+    // Test n8n Webhook
+    const testN8nBtn = document.getElementById('testN8nWebhook');
+    if (testN8nBtn) {
+        testN8nBtn.addEventListener('click', async function () {
+            const webhookUrl = document.getElementById('n8nWebhookUrl')?.value;
+            if (!webhookUrl) {
+                showToast('Enter webhook URL', 'warning');
+                return;
+            }
+            testN8nBtn.disabled = true;
+            testN8nBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Testing...';
+            try {
+                const res = await fetch(webhookUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ ping: true })
+                });
+                if (res.ok) {
+                    showToast('Webhook test successful!', 'success');
+                } else {
+                    showToast('Webhook test failed: ' + res.status + ' ' + res.statusText, 'danger');
+                }
+            } catch (e) {
+                showToast('Webhook test failed: ' + (e.message || e), 'danger');
+            } finally {
+                testN8nBtn.disabled = false;
+                testN8nBtn.innerHTML = '<i class="bi bi-send"></i> Test Connection';
+            }
+        });
+    }
+
+    // Request Data Export
+    const dataExportBtn = document.getElementById('requestDataExport');
+    if (dataExportBtn) {
+        dataExportBtn.addEventListener('click', async function() {
+            dataExportBtn.disabled = true;
+            dataExportBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Processing...';
+            
+            try {
+                const res = await fetch('/accounts/request-data-export/', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': (document.querySelector('[name=csrfmiddlewaretoken]')?.value || '')
+                    }
+                });
+                const j = await res.json();
+                if (res.ok && j.success) {
+                    showToast('Data export requested. You will receive an email when ready.', 'success');
+                } else {
+                    showToast(j.message || 'Failed to request data export', 'danger');
+                }
+            } catch (e) {
+                showToast('Network error', 'danger');
+            } finally {
+                dataExportBtn.disabled = false;
+                dataExportBtn.innerHTML = '<i class="bi bi-file-earmark-arrow-down"></i> Request Data Export';
+            }
+        });
+    }
+
+    // Delete Account Confirmation
+    const deleteConfirmInput = document.getElementById('deleteConfirmation');
+    const confirmDeleteBtn = document.getElementById('confirmDeleteAccount');
+    function getCookie(name) {
+        let v = null;
+        if (document.cookie && document.cookie !== '') {
+            for (let c of document.cookie.split(';')) {
+                c = c.trim();
+                if (c.startsWith(name + '=')) { v = decodeURIComponent(c.substring(name.length + 1)); break; }
+            }
+        }
+        return v;
+    }
+    if (deleteConfirmInput && confirmDeleteBtn) {
+        deleteConfirmInput.addEventListener('input', function() {
+            confirmDeleteBtn.disabled = (this.value.trim().toUpperCase() !== 'DELETE');
+        });
+        
+        confirmDeleteBtn.addEventListener('click', async function() {
+            if (deleteConfirmInput.value.trim().toUpperCase() !== 'DELETE') return;
+            confirmDeleteBtn.disabled = true;
+            confirmDeleteBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Deleting...';
+            
+            try {
+                const csrf = (document.querySelector('[name=csrfmiddlewaretoken]')?.value || getCookie('csrftoken') || '');
+                const res = await fetch('/api/account/delete', {
+                    method: 'POST',
+                    headers: { 'X-CSRFToken': csrf },
+                    credentials: 'same-origin'
+                });
+                if (res.ok) {
+                    showToast('Account deleted. Redirecting...', 'success');
+                    setTimeout(() => { window.location.href = '/signin/'; }, 900);
+                } else {
+                    const j = await res.json().catch(()=>({}));
+                    throw new Error(j.error || 'Failed to delete account');
+                }
+            } catch (e) {
+                showToast(String(e.message || e), 'danger');
+                confirmDeleteBtn.disabled = false;
+                confirmDeleteBtn.innerHTML = '<i class="bi bi-trash"></i> Delete Account';
+            }
+        });
+    }
+
+    // Helper for toast notifications
+    function showToast(message, type) {
+        const toastContainer = document.querySelector('.toast-container') || createToastContainer();
+        const toast = document.createElement('div');
+        toast.className = `alert alert-${type} alert-dismissible fade show`;
+        toast.innerHTML = `
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        toastContainer.appendChild(toast);
+        setTimeout(() => toast.remove(), 5000);
+    }
+
+    function createToastContainer() {
+        const container = document.createElement('div');
+        container.className = 'toast-container position-fixed bottom-0 end-0 p-3';
+        document.body.appendChild(container);
+        return container;
+    }
+
+    // Activity Summary - fetch dynamic counts
+    async function refreshProfileSummary() {
+        try {
+            const res = await fetch('/api/profile-stats');
+            const j = await res.json();
+            if (!(res.ok && j.status === 'success')) return;
+
+            const tx = document.getElementById('profileTransactions');
+            const pr = document.getElementById('profilePredictions');
+            const al = document.getElementById('profileAlerts');
+            const rp = document.getElementById('profileReports');
+
+            const transactions = Number(j.transactions || 0);
+            const alertsActive = Number(j.alerts_active || 0);
+            const reports = Number(j.reports || transactions);
+
+            if (tx) tx.textContent = transactions;
+            if (pr) pr.textContent = transactions; // predictions ~ transactions stored
+            if (al) al.textContent = alertsActive;
+            if (rp) rp.textContent = reports;
+        } catch (_) {
+            // Non-fatal
+        }
+    }
+    refreshProfileSummary();
+});
+</script>
+{% endblock %}

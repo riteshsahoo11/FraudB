@@ -1,0 +1,85 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}Prediction {{ transaction_id }} - Details{% endblock %}
+
+{% block content %}
+<div class="container mt-5 pt-4">
+  <div class="row mb-3">
+    <div class="col-12 d-flex justify-content-between align-items-center">
+      <h3 class="mb-0"><i class="bi bi-file-earmark-text me-2"></i>Prediction Details</h3>
+      <div>
+        <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary btn-sm me-2"><i class="bi bi-arrow-left"></i> Back to Dashboard</a>
+        <a href="/api/prediction/{{ transaction_id }}/report" class="btn btn-primary btn-sm"><i class="bi bi-download"></i> Download Report</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-3">
+    <div class="col-md-8">
+      <div class="card shadow-sm">
+        <div class="card-header">
+          <strong>Overview</strong>
+        </div>
+        <div class="card-body">
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <div class="mb-2"><strong>Transaction ID:</strong> <span class="text-monospace">{{ transaction_id }}</span></div>
+              <div class="mb-2"><strong>Timestamp:</strong> {{ timestamp }}</div>
+              <div class="mb-2"><strong>Customer ID:</strong> {{ customer_id|default:'N/A' }}</div>
+              <div class="mb-2"><strong>Channel:</strong> {{ channel|default:'N/A' }}</div>
+            </div>
+            <div class="col-md-6">
+              <div class="mb-2"><strong>Amount:</strong> ${{ amount|default:0 }}</div>
+              <div class="mb-2"><strong>Prediction:</strong>
+                {% if prediction == 1 %}
+                  <span class="badge bg-danger">Fraud</span>
+                {% else %}
+                  <span class="badge bg-success">Legit</span>
+                {% endif %}
+              </div>
+              <div class="mb-2"><strong>Risk Level:</strong> <span class="badge bg-secondary">{{ risk_level|default:'UNKNOWN' }}</span></div>
+              <div class="mb-2"><strong>Risk Score:</strong> {{ risk_score|default:'-' }}</div>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-6">
+              <div class="mb-2"><strong>Confidence:</strong> {{ confidence_level|default:'-' }}</div>
+              <div class="mb-2"><strong>Model Version:</strong> {{ model_version|default:'-' }}</div>
+            </div>
+            <div class="col-md-6">
+              <div class="mb-2"><strong>Processing Time:</strong> {{ processing_time_ms|default:'-' }} ms</div>
+              <div class="mb-2"><strong>Reason:</strong> {{ reason|default:'-' }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card shadow-sm mt-3">
+        <div class="card-header"><strong>Input Payload</strong></div>
+        <div class="card-body">
+          <pre class="mb-0" style="white-space: pre-wrap;">{{ raw_payload }}</pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="card shadow-sm">
+        <div class="card-header"><strong>Rules Triggered</strong></div>
+        <div class="card-body">
+          {% if rules_triggered and rules_triggered|length > 0 %}
+          <ul class="list-group list-group-flush">
+            {% for r in rules_triggered %}
+            <li class="list-group-item">{{ r }}</li>
+            {% endfor %}
+          </ul>
+          {% else %}
+          <p class="text-muted mb-0">No rules triggered</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
